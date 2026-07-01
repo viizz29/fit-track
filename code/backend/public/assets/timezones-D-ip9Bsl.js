@@ -1,1 +1,0 @@
-function e(){return typeof Intl<`u`&&`supportedValuesOf`in Intl?Intl.supportedValuesOf(`timeZone`):[`UTC`,`America/New_York`,`America/Chicago`,`America/Denver`,`America/Los_Angeles`,`Europe/London`,`Europe/Paris`,`Europe/Berlin`,`Asia/Tokyo`,`Asia/Shanghai`,`Asia/Kolkata`,`Australia/Sydney`,`Pacific/Auckland`]}export{e as t};

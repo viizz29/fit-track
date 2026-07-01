@@ -1,1 +1,0 @@
-import{n as e,r as t,rt as n,t as r}from"./Button-CX9BwKk6.js";var i=n();function a({title:n,actionLabel:a,onAction:o,actionIcon:s}){return(0,i.jsxs)(e,{sx:{display:`flex`,justifyContent:`space-between`,alignItems:`center`,mb:3},children:[(0,i.jsx)(t,{variant:`h5`,children:n}),a&&o&&(0,i.jsx)(r,{variant:`contained`,startIcon:s,onClick:o,children:a})]})}export{a as t};
