@@ -1,0 +1,1 @@
+import{N as e}from"./QueryClientProvider-B5abG_TF.js";var t=async()=>(await e.get(`/api/v1/exercises`)).data,n=async t=>(await e.post(`/api/v1/exercises`,t)).data,r=async t=>(await e.get(`/api/v1/exercises/${t}`)).data,i=async(t,n)=>(await e.put(`/api/v1/exercises/${t}`,n)).data,a=async t=>{await e.delete(`/api/v1/exercises/${t}`)};export{i as a,t as i,a as n,r,n as t};

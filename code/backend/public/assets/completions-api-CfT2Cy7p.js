@@ -1,0 +1,1 @@
+import{N as e}from"./QueryClientProvider-B5abG_TF.js";var t=async t=>{await e.delete(`/api/v1/completions/${t}`)},n=async t=>{let n=new URLSearchParams;t?.dateFrom&&n.set(`dateFrom`,t.dateFrom),t?.dateTo&&n.set(`dateTo`,t.dateTo),t?.scheduleId&&n.set(`scheduleId`,t.scheduleId);let r=n.toString();return(await e.get(`/api/v1/completions${r?`?${r}`:``}`)).data};export{n,t};

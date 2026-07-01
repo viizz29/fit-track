@@ -1,0 +1,1 @@
+import{ft as e,ht as t}from"./Button-CX9BwKk6.js";var n=t(e());function r(e,t){return n.isValidElement(e)&&t.indexOf(e.type.muiName??e.type?._payload?.value?.muiName)!==-1}var i=r;export{r as n,i as t};

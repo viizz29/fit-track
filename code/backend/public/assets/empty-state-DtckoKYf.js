@@ -1,0 +1,1 @@
+import{rt as e}from"./Button-CX9BwKk6.js";import{t}from"./Alert-frAKgump.js";var n=e();function r({message:e,severity:r=`info`}){return(0,n.jsx)(t,{severity:r,children:e})}export{r as t};
