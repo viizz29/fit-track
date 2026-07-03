@@ -194,7 +194,7 @@ export default function ProfilePage() {
                       <TableBody>
                         {recentCompletions.map((c) => (
                           <TableRow key={c.id}>
-                            <TableCell>{c.schedule.exerciseType.name || c.scheduleTitle || "—"}</TableCell>
+                            <TableCell>{c.schedule['exerciseType.name'] || c.scheduleTitle || "—"}</TableCell>
                             <TableCell>
                               {new Date(c.completionDatetime).toLocaleDateString("en-US", {
                                 month: "short", day: "numeric",

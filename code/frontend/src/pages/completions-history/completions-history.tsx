@@ -60,7 +60,7 @@ export default function CompletionsHistory() {
 
 
   const columns: Column<CompletionRecord>[] = [
-    { key: "_exerciseName", label: "Exercise", sortable: true, render: (row) => row.schedule.exerciseType.name },
+    { key: "_exerciseName", label: "Exercise", sortable: true, render: (row) => row.schedule['exerciseType.name'] },
     { key: "_scheduleTitle", label: "Schedule", hideOnMobile: true, sortable: true, render: (row) => row.schedule.recurrenceType },
     { key: "completionDateTime", label: "Completed At", sortable: true, render: (row) => new Date(row.completionDatetime).toLocaleString() },
     {
