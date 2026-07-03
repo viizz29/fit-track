@@ -38,6 +38,17 @@ export class ExerciseSchedulesController {
     return this.exerciseSchedulesService.findAll(user.userId);
   }
 
+  @Get('week')
+  @ApiOperation({
+    summary: 'Get all exercises scheduled for a week grouped by day. Defaults to current week if no date provided.',
+  })
+  getWeek(
+    @CurrentUser() user: { userId: string },
+    @Query() dto: QueryExerciseScheduleDto,
+  ) {
+    return this.exerciseSchedulesService.getWeekExercises(user.userId, dto);
+  }
+
   @Get('date')
   @ApiOperation({
     summary: 'Get exercise schedules scheduled on a particular date',

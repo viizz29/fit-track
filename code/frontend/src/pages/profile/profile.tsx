@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect } from "react";
 import {
   Typography, Paper, Box, Grid, Avatar, Chip,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Skeleton, Alert, Tabs, Tab, TextField, Button, MenuItem,
+  Skeleton, Alert, Tabs, Tab, TextField, Button,
   Switch, FormControlLabel, useTheme,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
@@ -28,13 +28,11 @@ import { getExercisesApi } from "@/api/exercises-api";
 import { getSchedulesApi } from "@/api/schedules-api";
 import { getCompletionsApi } from "@/api/completions-api";
 import { updateProfileApi, updateEmailPreferencesApi, getProfileApi, getEmailPreferencesApi } from "@/api/auth-api";
-import { getTimezones } from "@/utils/timezones";
 
 export default function ProfilePage() {
   const theme = useTheme();
   const { user, updateProfile } = useAuth();
   const [tab, setTab] = useState(0);
-  const timezones = useMemo(() => getTimezones(), []);
   const [emailNotifications, setEmailNotifications] = useState(true);
 
   const exercisesQuery = useQuery({ queryKey: ["exercises"], queryFn: getExercisesApi });
@@ -196,7 +194,7 @@ export default function ProfilePage() {
                       <TableBody>
                         {recentCompletions.map((c) => (
                           <TableRow key={c.id}>
-                            <TableCell>{c.exerciseName || c.scheduleTitle || "—"}</TableCell>
+                            <TableCell>{c.schedule.exerciseType.name || c.scheduleTitle || "—"}</TableCell>
                             <TableCell>
                               {new Date(c.completionDatetime).toLocaleDateString("en-US", {
                                 month: "short", day: "numeric",
@@ -234,12 +232,11 @@ export default function ProfilePage() {
                 initialValues={{
                   email: profileData?.email || user?.email || "",
                   name: profileData?.name || user?.name || "",
-                  timezone: profileData?.timezone || user?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+
                 }}
                 validationSchema={Yup.object({
                   email: Yup.string().email("Invalid email").required("Required"),
                   name: Yup.string(),
-                  timezone: Yup.string().required("Required"),
                 })}
                 onSubmit={(values) => profileMutation.mutate(values)}
               >
@@ -247,11 +244,7 @@ export default function ProfilePage() {
                   <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2, maxWidth: 448 }}>
                     <TextField fullWidth label="Email" name="email" value={values.email} onChange={handleChange} error={touched.email && !!errors.email} helperText={touched.email && typeof errors.email === "string" ? errors.email : undefined} />
                     <TextField fullWidth label="Name" name="name" value={values.name} onChange={handleChange} error={touched.name && !!errors.name} helperText={touched.name && typeof errors.name === "string" ? errors.name : undefined} />
-                    <TextField fullWidth select label="Timezone" name="timezone" value={values.timezone} onChange={handleChange} error={touched.timezone && !!errors.timezone} helperText={touched.timezone && typeof errors.timezone === "string" ? errors.timezone : undefined}>
-                      {timezones.map((tz) => (
-                        <MenuItem key={tz} value={tz}>{tz}</MenuItem>
-                      ))}
-                    </TextField>
+
                     <Box sx={{ display: "flex", gap: 2 }}>
                       <Button type="submit" variant="contained" disabled={!dirty || profileMutation.isPending}>
                         {profileMutation.isPending ? "Saving..." : "Save"}

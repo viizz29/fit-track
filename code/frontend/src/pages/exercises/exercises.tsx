@@ -44,7 +44,7 @@ export default function Exercises() {
 
   const columns: Column<Exercise>[] = [
     { key: "name", label: "Name", sortable: true },
-    { key: "description", label: "Description", sortable: true, hideOnMobile: true, render: (row) => snippet(row.description) },
+    { key: "description", label: "Description", sortable: true, render: (row) => snippet(row.description) },
     { key: "createdAt", label: "Created", sortable: true, hideOnMobile: true, render: (row) => row.createdAt ? formatDate(new Date(row.createdAt)) : "—" },
     { key: "updatedAt", label: "Updated", sortable: true, hideOnMobile: true, render: (row) => row.updatedAt ? formatDate(new Date(row.updatedAt)) : "—" },
     {

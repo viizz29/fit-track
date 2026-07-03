@@ -1,4 +1,4 @@
-import { Typography, Button, Box, TextField, MenuItem, Alert } from "@mui/material";
+import { Typography, Button, Box, TextField, MenuItem, Alert, Checkbox, ListItemText } from "@mui/material";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
@@ -13,7 +13,8 @@ import { useAuth } from "@/context/use-auth";
 import { createScheduleApi } from "@/api/schedules-api";
 import { getExercisesApi } from "@/api/exercises-api";
 
-const RECURRENCE_TYPES = ["HOURLY", "DAILY", "WEEKLY"];
+const RECURRENCE_TYPES = ["DAILY", "WEEKLY"];
+const WEEKDAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
 export default function ScheduleCreate() {
   const { user } = useAuth();
@@ -52,7 +53,7 @@ export default function ScheduleCreate() {
             startTime: dayjs().format("HH:mm"),
             timezone: defaultTz,
             recurrenceType: "DAILY",
-            recurrenceInterval: 1,
+            weekdays: [] as string[],
           }}
           validationSchema={Yup.object({
             exerciseTypeId: Yup.string().required("Select an exercise"),
@@ -60,9 +61,9 @@ export default function ScheduleCreate() {
             startTime: Yup.string().required("Required"),
             timezone: Yup.string().required("Required"),
             recurrenceType: Yup.string(),
-            recurrenceInterval: Yup.number().when("recurrenceType", {
-              is: (v: string) => v.length > 0,
-              then: (s) => s.min(1, "Must be > 0").required("Required"),
+            weekdays: Yup.array().when("recurrenceType", {
+              is: "WEEKLY",
+              then: (s) => s.min(1, "Select at least one day").required("Required"),
               otherwise: (s) => s.notRequired(),
             }),
           })}
@@ -72,64 +73,75 @@ export default function ScheduleCreate() {
               startDatetime: `${values.startDate}T${values.startTime}`,
               timezone: values.timezone,
               recurrenceType: values.recurrenceType || undefined,
-              recurrenceInterval: values.recurrenceType ? values.recurrenceInterval : undefined,
+              weekdays: values.recurrenceType === "WEEKLY" ? values.weekdays : undefined,
             });
           }}
         >
-          {({ handleSubmit, handleChange, handleBlur, setFieldValue, values, errors, touched }) => (
-            <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <TextField
-                fullWidth select label="Exercise" name="exerciseTypeId"
-                value={values.exerciseTypeId} onChange={handleChange}
-                error={touched.exerciseTypeId && !!errors.exerciseTypeId} helperText={touched.exerciseTypeId && errors.exerciseTypeId}
-              >
-                {exercises?.map((ex) => (
-                  <MenuItem key={ex.id} value={ex.id}>{ex.name}</MenuItem>
-                ))}
-              </TextField>
-
-              <DateTimePickerWithTimezone
-                dateValue={values.startDate}
-                timeValue={values.startTime}
-                timezoneValue={values.timezone}
-                onDateChange={(v) => setFieldValue("startDate", v)}
-                onTimeChange={(v) => setFieldValue("startTime", v)}
-                onTimezoneChange={(v) => setFieldValue("timezone", v)}
-                dateError={touched.startDate && typeof errors.startDate === "string" ? errors.startDate : undefined}
-                timeError={touched.startTime && typeof errors.startTime === "string" ? errors.startTime : undefined}
-                timezoneError={touched.timezone && typeof errors.timezone === "string" ? errors.timezone : undefined}
-              />
-
-              <Typography variant="subtitle2" sx={{ mt: 1 }}>Recurrence (optional)</Typography>
-
-              <Box sx={{ display: "flex", gap: 2 }}>
+          {({ handleSubmit, handleChange, setFieldValue, values, errors, touched }) => {
+            const showWeekdays = values.recurrenceType === "WEEKLY";
+            return (
+              <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 <TextField
-                  fullWidth select label="Type" name="recurrenceType"
-                  value={values.recurrenceType} onChange={handleChange}
+                  fullWidth select label="Exercise" name="exerciseTypeId"
+                  value={values.exerciseTypeId} onChange={handleChange}
+                  error={touched.exerciseTypeId && !!errors.exerciseTypeId} helperText={touched.exerciseTypeId && errors.exerciseTypeId}
                 >
-                  <MenuItem value="">None</MenuItem>
-                  {RECURRENCE_TYPES.map((r) => (
-                    <MenuItem key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</MenuItem>
+                  {exercises?.map((ex) => (
+                    <MenuItem key={ex.id} value={ex.id}>{ex.name}</MenuItem>
                   ))}
                 </TextField>
-                <TextField
-                  fullWidth label="Interval" type="number" name="recurrenceInterval"
-                  value={values.recurrenceInterval} onChange={handleChange} onBlur={handleBlur}
-                  error={touched.recurrenceInterval && !!errors.recurrenceInterval}
-                  helperText={touched.recurrenceInterval && errors.recurrenceInterval}
-                  disabled={!values.recurrenceType}
-                  inputProps={{ min: 1 }}
-                />
-              </Box>
 
-              <Box sx={{ display: "flex", gap: 2, mt: 1 }}>
-                <Button type="submit" variant="contained" disabled={mutation.isPending}>
-                  {mutation.isPending ? "Creating..." : "Create"}
-                </Button>
-                <Button variant="outlined" onClick={() => navigate("/schedules")}>Cancel</Button>
+                <DateTimePickerWithTimezone
+                  dateValue={values.startDate}
+                  timeValue={values.startTime}
+                  timezoneValue={values.timezone}
+                  onDateChange={(v) => setFieldValue("startDate", v)}
+                  onTimeChange={(v) => setFieldValue("startTime", v)}
+                  onTimezoneChange={(v) => setFieldValue("timezone", v)}
+                  dateError={touched.startDate && typeof errors.startDate === "string" ? errors.startDate : undefined}
+                  timeError={touched.startTime && typeof errors.startTime === "string" ? errors.startTime : undefined}
+                  timezoneError={touched.timezone && typeof errors.timezone === "string" ? errors.timezone : undefined}
+                />
+
+                <Typography variant="subtitle2" sx={{ mt: 1 }}>Recurrence (optional)</Typography>
+
+                <Box sx={{ display: "flex", gap: 2 }}>
+                  <TextField
+                    fullWidth select label="Type" name="recurrenceType"
+                    value={values.recurrenceType} onChange={handleChange}
+                  >
+                    <MenuItem value="">None</MenuItem>
+                    {RECURRENCE_TYPES.map((r) => (
+                      <MenuItem key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</MenuItem>
+                    ))}
+                  </TextField>
+                  {showWeekdays && (
+                    <TextField
+                      fullWidth select label="Days" name="weekdays"
+                      value={values.weekdays} onChange={handleChange}
+                      error={touched.weekdays && !!errors.weekdays}
+                      helperText={touched.weekdays && errors.weekdays}
+                      SelectProps={{ multiple: true, renderValue: (selected: unknown) => (selected as string[]).join(", ") }}
+                    >
+                      {WEEKDAYS.map((d) => (
+                        <MenuItem key={d} value={d}>
+                          <Checkbox checked={values.weekdays.includes(d)} />
+                          <ListItemText primary={d} />
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  )}
+                </Box>
+
+                <Box sx={{ display: "flex", gap: 2, mt: 1 }}>
+                  <Button type="submit" variant="contained" disabled={mutation.isPending}>
+                    {mutation.isPending ? "Creating..." : "Create"}
+                  </Button>
+                  <Button variant="outlined" onClick={() => navigate("/schedules")}>Cancel</Button>
+                </Box>
               </Box>
-            </Box>
-          )}
+            );
+          }}
         </Formik>
       </FormCard>
     </PageWrapper>

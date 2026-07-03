@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   Paper, Box, TextField, MenuItem, Button, IconButton, Alert,
 } from "@mui/material";
@@ -12,7 +12,6 @@ import ConfirmDeleteDialog from "@/components/modals/confirm-delete-dialog";
 import { getCompletionsApi, deleteCompletionApi } from "@/api/completions-api";
 import { getSchedulesApi } from "@/api/schedules-api";
 import type { CompletionRecord } from "@/api/completions-api";
-import type { ExerciseSchedule } from "@/api/schedules-api";
 import type { Column } from "@/components/data-display/data-table";
 import type { Dayjs } from "dayjs";
 
@@ -27,12 +26,6 @@ export default function CompletionsHistory() {
     queryKey: ["schedules"],
     queryFn: getSchedulesApi,
   });
-
-  const scheduleMap = useMemo(() => {
-    const map = new Map<string, ExerciseSchedule>();
-    schedules?.forEach((s) => map.set(s.id, s));
-    return map;
-  }, [schedules]);
 
   const dateFromStr = dateFrom?.format("YYYY-MM-DD");
   const dateToStr = dateTo?.format("YYYY-MM-DD");
@@ -64,21 +57,11 @@ export default function CompletionsHistory() {
     setScheduleId("");
   };
 
-  const enriched = useMemo(() => {
-    if (!completions) return [];
-    return completions.map((c) => {
-      const s = scheduleMap.get(c.scheduleId);
-      return {
-        ...c,
-        _exerciseName: c.exerciseName || s?.exerciseType.name || "—",
-        _scheduleTitle: c.scheduleTitle || s?.title || "—",
-      };
-    });
-  }, [completions, scheduleMap]);
 
-  const columns: Column<CompletionRecord & { _exerciseName: string; _scheduleTitle: string }>[] = [
-    { key: "_exerciseName", label: "Exercise", sortable: true },
-    { key: "_scheduleTitle", label: "Schedule", sortable: true },
+
+  const columns: Column<CompletionRecord>[] = [
+    { key: "_exerciseName", label: "Exercise", sortable: true, render: (row) => row.schedule.exerciseType.name },
+    { key: "_scheduleTitle", label: "Schedule", hideOnMobile: true, sortable: true, render: (row) => row.schedule.recurrenceType },
     { key: "completionDateTime", label: "Completed At", sortable: true, render: (row) => new Date(row.completionDatetime).toLocaleString() },
     {
       key: "actions", label: "Actions", align: "right", width: 70,
@@ -122,10 +105,10 @@ export default function CompletionsHistory() {
         <Alert severity="error" sx={{ mb: 2 }}>Failed to load completions.</Alert>
       )}
 
-      {!isError && (
+      {!isError && completions && (
         <DataTable
           columns={columns}
-          data={enriched}
+          data={completions}
           getRowKey={(row) => row.id}
           loading={isLoading}
           emptyMessage="No completions match the selected filters."

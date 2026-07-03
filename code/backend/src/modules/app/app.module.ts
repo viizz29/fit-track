@@ -11,11 +11,11 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from '../auth/auth.module';
 import { UsersModule } from '../users/users.module';
-import { NotesModule } from '../notes/notes.module';
 import { ExerciseTypesModule } from '../exercise-types/exercise-types.module';
 import { ExerciseSchedulesModule } from '../exercise-schedules/exercise-schedules.module';
 import { ExerciseCompletionsModule } from '../exercise-completions/exercise-completions.module';
 import { ReportsModule } from '../reports/reports.module';
+import { ExerciseStatsModule } from '../exercise-stats/exercise-stats.module';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { ChatModule } from '../chat/chat.module';
@@ -24,11 +24,11 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 const imports = [
   AuthModule,
   UsersModule,
-  NotesModule,
   ExerciseTypesModule,
   ExerciseSchedulesModule,
   ExerciseCompletionsModule,
   ReportsModule,
+  ExerciseStatsModule,
   SequelizeModule.forRoot({
     dialect: 'postgres', // or 'mysql', 'sqlite', etc.
     host: 'localhost',
@@ -36,6 +36,7 @@ const imports = [
     username: DB_USERNAME,
     password: DB_PASSWORD,
     database: DB_DATABASE,
+    timezone: '+00:00',
     autoLoadModels: true, // Automatically load models registered in modules
     synchronize: false, // Sync models with DB (don't use true in production!)
     define: {

@@ -81,7 +81,7 @@ export class ReportsService {
 
       const expected = this.calculateExpectedOccurrences(
         schedule.recurrenceType,
-        schedule.recurrenceInterval,
+        schedule.weekdays,
         effectiveStart,
         end,
       );
@@ -117,14 +117,14 @@ export class ReportsService {
     const dailyCompletions: Set<string> = new Set();
 
     for (const schedule of schedules) {
-      const scheduleStart = new Date(schedule.startDatetime);
+      const scheduleStart = new Date(schedule.get('startDatetime'));
       const effectiveStart = scheduleStart > start ? scheduleStart : start;
 
       if (effectiveStart > end) continue;
 
       const expected = this.calculateExpectedOccurrences(
-        schedule.recurrenceType,
-        schedule.recurrenceInterval,
+        schedule.get('recurrenceType'),
+        schedule.get('weekdays'),
         effectiveStart,
         end,
       );
@@ -142,7 +142,9 @@ export class ReportsService {
       totalCompleted += completions.length;
 
       for (const c of completions) {
-        const d = new Date(c.completionDatetime).toISOString().slice(0, 10);
+        const d = new Date(c.get('completionDatetime'))
+          .toISOString()
+          .slice(0, 10);
         dailyCompletions.add(d);
       }
     }
@@ -152,7 +154,7 @@ export class ReportsService {
     const streakData = this.calculateStreaks(allDates, dailyCompletions);
 
     return {
-      rate: Math.round(rate * 10000) / 100,
+      overallRate: Number(rate.toFixed(2)),
       completed: totalCompleted,
       expected: totalExpected,
       currentStreak: streakData.currentStreak,
@@ -163,20 +165,28 @@ export class ReportsService {
 
   private calculateExpectedOccurrences(
     recurrenceType: string,
-    interval: number,
+    weekdays: string[] | null,
     start: Date,
     end: Date,
   ): number {
-    const diffMs = end.getTime() - start.getTime();
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
+    const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
     switch (recurrenceType) {
-      case 'HOURLY':
-        return Math.floor(diffMs / (1000 * 60 * 60 * interval)) + 1;
       case 'DAILY':
-        return Math.ceil(diffDays / interval);
-      case 'WEEKLY':
-        return Math.ceil(diffDays / (7 * interval));
+        return Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      case 'WEEKLY': {
+        if (!weekdays || weekdays.length === 0) return 0;
+        const daySet = new Set(weekdays);
+        let count = 0;
+        const current = new Date(start);
+        while (current <= end) {
+          if (daySet.has(dayNames[current.getDay()])) {
+            count++;
+          }
+          current.setDate(current.getDate() + 1);
+        }
+        return count;
+      }
       default:
         return 0;
     }

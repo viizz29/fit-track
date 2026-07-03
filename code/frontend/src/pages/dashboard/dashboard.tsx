@@ -21,10 +21,19 @@ export default function Dashboard() {
   const queryClient = useQueryClient();
   const today = dayjs().format("YYYY-MM-DD");
 
-  const { data: groups, isLoading, isError } = useQuery({
+  const { data: schedules, isLoading, isError } = useQuery({
     queryKey: ["scheduled-tasks", today],
     queryFn: () => getSchedulesByDateApi(today),
   });
+
+  const groups = useMemo(() => {
+    const grouped: Record<GroupKey, ExerciseSchedule[]> = { DAILY: [], WEEKLY: [] };
+    for (const s of schedules ?? []) {
+      const key = (s.recurrenceType as GroupKey) || "DAILY";
+      if (key in grouped) grouped[key].push(s);
+    }
+    return grouped;
+  }, [schedules]);
 
   const completeMutation = useMutation({
     mutationFn: (scheduleId: string) =>
@@ -36,10 +45,7 @@ export default function Dashboard() {
     onError: () => toast.error("Failed to mark exercise as complete"),
   });
 
-  const allToday = useMemo(
-    () => Object.values(groups ?? {}).flat(),
-    [groups],
-  );
+  const allToday = useMemo(() => schedules ?? [], [schedules]);
 
   const summary = useMemo(() => {
     const total = allToday.length;
@@ -52,7 +58,7 @@ export default function Dashboard() {
   }, [allToday]);
 
   const entries = (Object.entries(groupLabels) as [GroupKey, string][]).filter(
-    ([key]) => (groups?.[key] ?? []).length > 0,
+    ([key]) => groups[key].length > 0,
   );
 
   return (
@@ -67,7 +73,7 @@ export default function Dashboard() {
         <StatCard icon={<WarningIcon color="warning" fontSize="small" />} label="Pending" value={summary.pending} loading={isLoading} color="warning.main" />
       </Box>
 
-      {!isLoading && allToday.length > 0 && (
+      {/* {!isLoading && allToday.length > 0 && (
         <Alert severity={summary.missed > 0 ? "warning" : "info"} sx={{ mb: 3 }}>
           <Box sx={{ display: "flex", gap: 3 }}>
             <span><strong>{summary.completed}</strong> completed</span>
@@ -75,7 +81,7 @@ export default function Dashboard() {
             {summary.missed > 0 && <span><strong>{summary.missed}</strong> missed</span>}
           </Box>
         </Alert>
-      )}
+      )} */}
 
       {isError && (
         <Alert severity="error" sx={{ mb: 2 }}>Failed to load schedules.</Alert>
@@ -94,7 +100,7 @@ export default function Dashboard() {
           )}
 
           {entries.map(([key, label]) => {
-            const items = groups![key] as ExerciseSchedule[];
+            const items = groups[key];
             return (
               <Box key={key} sx={{ mb: 3 }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>

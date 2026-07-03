@@ -1,5 +1,4 @@
 import api from "./client";
-import type { Exercise } from "./exercises-api";
 
 export type ExerciseSchedule = {
   id: string;
@@ -10,9 +9,11 @@ export type ExerciseSchedule = {
   timezone?: string;
   recurrence?: string;
   recurrenceType?: string;
-  recurrenceInterval?: number;
+  weekdays?: string[];
   completed?: boolean;
-  exerciseType: Exercise;
+  "exerciseType.id": string;
+  "exerciseType.name": string;
+  "exerciseType.description": string;
 };
 
 export const getSchedulesApi = async (): Promise<ExerciseSchedule[]> => {
@@ -31,7 +32,7 @@ export const createScheduleApi = async (data: {
   endTime?: string;
   timezone?: string;
   recurrenceType?: string;
-  recurrenceInterval?: number;
+  weekdays?: string[];
 }): Promise<ExerciseSchedule> => {
   const response = await api.post("/api/v1/schedules", data);
   return response.data;
@@ -45,7 +46,7 @@ export const updateScheduleApi = async (
     endTime?: string;
     timezone?: string;
     recurrenceType?: string;
-    recurrenceInterval?: number;
+    weekdays?: string[];
   },
 ): Promise<ExerciseSchedule> => {
   const response = await api.put(`/api/v1/schedules/${id}`, data);
@@ -58,11 +59,7 @@ export const deleteScheduleApi = async (id: string): Promise<void> => {
 
 export const getSchedulesByDateApi = async (
   date: string,
-): Promise<{
-  HOURLY: ExerciseSchedule[];
-  DAILY: ExerciseSchedule[];
-  WEEKLY: ExerciseSchedule[];
-}> => {
+): Promise<ExerciseSchedule[]> => {
   const response = await api.get(`/api/v1/schedules/date`, {
     params: { date },
   });
@@ -76,6 +73,23 @@ export const completeExerciseApi = async (
   const response = await api.post("/api/v1/completions", {
     scheduleId,
     completionDatetime: completionDatetime || new Date().toISOString(),
+  });
+  return response.data;
+};
+
+export const getSchedulesOfWeek = async (
+  startDate: string,
+): Promise<{
+  weekStart: string;
+  weekEnd: string;
+  days: {
+    date: string; // "2026-06-29"
+    dayOfWeek: string; // "MON",
+    exercises: ExerciseSchedule[];
+  }[];
+}> => {
+  const response = await api.get(`/api/v1/schedules/week`, {
+    params: { date: startDate },
   });
   return response.data;
 };

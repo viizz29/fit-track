@@ -4,7 +4,7 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.sequelize.transaction(async (transaction) => {
       await queryInterface.createTable(
-        'exercise_schedules',
+        'daily_exercise_stats',
         {
           id: {
             allowNull: false,
@@ -15,38 +15,35 @@ module.exports = {
           user_id: {
             allowNull: false,
             type: Sequelize.UUID,
-            references: {
-              model: 'users',
-              key: 'user_id',
-            },
+            references: { model: 'users', key: 'user_id' },
             onUpdate: 'CASCADE',
             onDelete: 'CASCADE',
+          },
+          date: {
+            allowNull: false,
+            type: Sequelize.DATEONLY,
           },
           exercise_type_id: {
             allowNull: false,
             type: Sequelize.UUID,
-            references: {
-              model: 'exercise_types',
-              key: 'id',
-            },
+            references: { model: 'exercise_types', key: 'id' },
             onUpdate: 'CASCADE',
             onDelete: 'CASCADE',
           },
-          recurrence_type: {
+          scheduled_count: {
             allowNull: false,
-            type: Sequelize.ENUM('DAILY', 'WEEKLY'),
+            type: Sequelize.INTEGER,
+            defaultValue: 0,
           },
-          weekdays: {
-            allowNull: true,
-            type: Sequelize.ARRAY(Sequelize.STRING(3)),
-          },
-          start_datetime: {
+          completed_count: {
             allowNull: false,
-            type: Sequelize.DATE,
+            type: Sequelize.INTEGER,
+            defaultValue: 0,
           },
-          timezone: {
+          is_finalized: {
             allowNull: false,
-            type: Sequelize.STRING(64),
+            type: Sequelize.BOOLEAN,
+            defaultValue: false,
           },
           created_at: {
             allowNull: false,
@@ -62,28 +59,28 @@ module.exports = {
         { transaction },
       );
 
-      await queryInterface.sequelize.query(
-        `ALTER TABLE ONLY "exercise_schedules" ADD CONSTRAINT "chk_exercise_schedules_weekdays" CHECK (
-          (recurrence_type = 'DAILY' AND weekdays IS NULL) OR
-          (recurrence_type = 'WEEKLY' AND weekdays IS NOT NULL AND array_length(weekdays, 1) > 0 AND weekdays <@ ARRAY['MON','TUE','WED','THU','FRI','SAT','SUN']::varchar(3)[])
-        )`,
-        { transaction },
-      );
-
-      await queryInterface.addIndex('exercise_schedules', ['user_id'], {
-        name: 'idx_exercise_schedules_user_id',
+      await queryInterface.addConstraint('daily_exercise_stats', {
+        fields: ['user_id', 'date', 'exercise_type_id'],
+        type: 'unique',
+        name: 'uq_daily_exercise_stats_user_date_type',
         transaction,
       });
 
-      await queryInterface.addIndex('exercise_schedules', ['exercise_type_id'], {
-        name: 'idx_exercise_schedules_exercise_type_id',
+      await queryInterface.addIndex('daily_exercise_stats', ['user_id'], {
+        name: 'idx_daily_exercise_stats_user_id',
+        transaction,
+      });
+
+      await queryInterface.addIndex('daily_exercise_stats', ['date'], {
+        name: 'idx_daily_exercise_stats_date',
         transaction,
       });
     });
   },
+
   async down(queryInterface, Sequelize) {
     await queryInterface.sequelize.transaction(async (transaction) => {
-      await queryInterface.dropTable('exercise_schedules', { transaction });
+      await queryInterface.dropTable('daily_exercise_stats', { transaction });
     });
   },
 };

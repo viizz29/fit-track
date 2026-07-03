@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
 import { ExerciseCompletion } from './exercise-completion.model';
 import { ExerciseSchedule } from '../exercise-schedules/exercise-schedule.model';
+import { ExerciseType } from '../exercise-types/exercise-type.model';
 import { CreateExerciseCompletionDto } from './dto/create-exercise-completion.dto';
 import { QueryExerciseCompletionDto } from './dto/query-exercise-completion.dto';
 
@@ -48,6 +49,7 @@ export class ExerciseCompletionsRepository {
           model: ExerciseSchedule,
           where: scheduleWhere,
           required: true,
+          include: [ExerciseType],
         },
       ],
     });

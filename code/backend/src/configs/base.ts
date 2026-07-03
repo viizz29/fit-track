@@ -1,5 +1,3 @@
-process.env.TZ = 'America/Danmarkshavn'; // set it to +00:00 ZONE
-
 import * as dotenv from 'dotenv';
 import path from 'path';
 import { addAlias } from 'module-alias';

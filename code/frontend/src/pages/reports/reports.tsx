@@ -1,8 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Typography, Paper, Box, Tabs, Tab, LinearProgress, Chip,
   Skeleton, Alert, Button, Card, CardContent, Grid,
-  useTheme,
+  useTheme, useMediaQuery,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
@@ -27,34 +27,25 @@ import type { CompletionRatePerExercise } from "@/api/reports-api";
 import type { Column } from "@/components/data-display/data-table";
 import type { Dayjs } from "dayjs";
 
-function countExpectedOccurrences(startTime: string, recurrenceType?: string, recurrenceInterval?: number): number {
+function countExpectedOccurrences(startTime: string, recurrenceType?: string, _recurrenceInterval?: number): number {
   if (!recurrenceType) return 1;
   const start = new Date(startTime);
   const now = new Date();
   if (start > now) return 0;
-  const diffMs = now.getTime() - start.getTime();
-  const interval = recurrenceInterval || 1;
-  switch (recurrenceType) {
-    case "hourly":
-      return Math.floor(diffMs / (1000 * 60 * 60 * interval)) + 1;
-    case "daily":
-      return Math.floor(diffMs / (1000 * 60 * 60 * 24 * interval)) + 1;
-    case "weekly":
-      return Math.floor(diffMs / (1000 * 60 * 60 * 24 * 7 * interval)) + 1;
+  switch (recurrenceType.toUpperCase()) {
+    case "DAILY":
+      return Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    case "WEEKLY":
+      return Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 7)) + 1;
     default:
       return 1;
   }
 }
 
-function getRecurrenceLabel(recurrenceType?: string, recurrenceInterval?: number): string {
+function getRecurrenceLabel(recurrenceType?: string, _recurrenceInterval?: number, weekdays?: string[]): string {
   if (!recurrenceType) return "One-time";
-  const interval = recurrenceInterval || 1;
-  switch (recurrenceType) {
-    case "hourly": return `Every ${interval === 1 ? "hour" : `${interval} hours`}`;
-    case "daily": return `Every ${interval === 1 ? "day" : `${interval} days`}`;
-    case "weekly": return `Every ${interval === 1 ? "week" : `${interval} weeks`}`;
-    default: return recurrenceType;
-  }
+  if (recurrenceType === "WEEKLY" && weekdays?.length) return `Weekly · ${weekdays.join(", ")}`;
+  return recurrenceType.charAt(0).toUpperCase() + recurrenceType.slice(1).toLowerCase();
 }
 
 type FrequencyRow = { exerciseName: string; count: number };
@@ -87,14 +78,14 @@ function computeScheduleAdherence(schedules: ExerciseSchedule[], completions: Co
   }
   const rows: AdherenceRow[] = [];
   for (const s of schedules) {
-    const totalOccurrences = countExpectedOccurrences(s.startDatetime, s.recurrenceType, s.recurrenceInterval);
+    const totalOccurrences = countExpectedOccurrences(s.startDatetime, s.recurrenceType);
     if (totalOccurrences === 0) continue;
     const schedCompletions = completionsBySchedule.get(s.id) || [];
     const completedOnTime = schedCompletions.length;
     rows.push({
       scheduleTitle: s.title,
-      exerciseName: s.exerciseType.name,
-      recurrence: getRecurrenceLabel(s.recurrenceType, s.recurrenceInterval),
+      exerciseName: s["exerciseType.name"],
+      recurrence: getRecurrenceLabel(s.recurrenceType, undefined, s.weekdays),
       totalOccurrences,
       completedOnTime: Math.min(completedOnTime, totalOccurrences),
       adherenceRate: Math.min(completedOnTime / totalOccurrences, 1),
@@ -132,6 +123,11 @@ export default function Reports() {
   const [startDate, setStartDate] = useState<Dayjs | null>(dayjs().subtract(30, "day"));
   const [endDate, setEndDate] = useState<Dayjs | null>(dayjs());
   const [dateKey, setDateKey] = useState(0);
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+  useEffect(() => {
+    if (isMobile && tab !== 0) setTab(0);
+  }, [isMobile, tab]);
 
   const startDateStr = startDate?.format("YYYY-MM-DD") || "";
   const endDateStr = endDate?.format("YYYY-MM-DD") || "";
@@ -216,9 +212,9 @@ export default function Reports() {
 
       <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
         <Tab icon={<BarChartIcon />} label="Completion Rate" iconPosition="start" />
-        <Tab icon={<CheckCircleIcon />} label="Exercise Frequency" iconPosition="start" />
-        <Tab icon={<CancelIcon />} label="Schedule Adherence" iconPosition="start" />
-        <Tab icon={<EventBusyIcon />} label="Missed Exercises" iconPosition="start" />
+        {!isMobile && <Tab icon={<CheckCircleIcon />} label="Exercise Frequency" iconPosition="start" />}
+        {!isMobile && <Tab icon={<CancelIcon />} label="Schedule Adherence" iconPosition="start" />}
+        {!isMobile && <Tab icon={<EventBusyIcon />} label="Missed Exercises" iconPosition="start" />}
       </Tabs>
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>Failed to load report data</Alert>}

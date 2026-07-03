@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Alert, IconButton, Chip } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -18,11 +18,10 @@ import type { Column } from "@/components/data-display/data-table";
 // import { DateTime } from "luxon";
 
 
-function getRecurrenceLabel(type?: string, interval?: number): string {
+function getRecurrenceLabel(type?: string, _interval?: number, days?: string[]): string {
   if (!type) return "One-time";
-  const i = interval || 1;
-  if (i === 1) return type.charAt(0).toUpperCase() + type.slice(1);
-  return `Every ${i} ${type}s`;
+  if (type === "WEEKLY" && days?.length) return `Weekly · ${days.join(", ")}`;
+  return type.charAt(0).toUpperCase() + type.slice(1);
 }
 
 export default function Schedules() {
@@ -32,6 +31,7 @@ export default function Schedules() {
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<string | null>(null);
+  const [processedSchedules, setProcessedSchedules] = useState<ExerciseSchedule[]>([]);
 
   const { data: schedules, isLoading, isError } = useQuery({
     queryKey: ["schedules"],
@@ -49,16 +49,17 @@ export default function Schedules() {
   });
 
   const columns: Column<ExerciseSchedule>[] = [
-    { key: "exerciseName", label: "Exercise", sortable: true, render: (row) => row.exerciseType.name || "—" },
+    { key: "exerciseName", label: "Exercise", sortable: true, render: (row) => row["exerciseType.name"] || "—" },
     {
-      key: "recurrenceType", label: "Recurrence", width: 140,
-      render: (row) => <Chip label={getRecurrenceLabel(row.recurrenceType, row.recurrenceInterval)} size="small" variant="outlined" />,
+      key: "recurrenceType", label: "Recurrence", width: 110,
+      render: (row) => <Chip label={getRecurrenceLabel(row.recurrenceType, undefined, row.weekdays)} size="small" variant="outlined" />,
     },
-    { key: "exerciseTime", label: "Time", sortable: true, render: (row) => new Date(row.startDatetime).toLocaleTimeString() },
-    { key: "startDatetime", label: "Start", sortable: true, render: (row) => new Date(row.startDatetime).toLocaleDateString() },
-    { key: "timezone", label: "Timezone", sortable: true, render: (row) => row.timezone || "—" },
+    { key: "exerciseTime", label: "Time", hideOnMobile: true, sortable: true, render: (row) => new Date(row.startDatetime).toLocaleTimeString() },
+    { key: "startDatetime", label: "Start", hideOnMobile: true, sortable: true, render: (row) => new Date(row.startDatetime).toLocaleDateString() },
+    { key: "timezone", label: "Timezone", hideOnMobile: true, sortable: true, render: (row) => row.timezone || "—" },
     {
       key: "completed", label: "Status", width: 110,
+      hideOnMobile: true,
       render: (row) => (
         <Chip label={row.completed ? "Completed" : "Active"} color={row.completed ? "success" : "primary"} size="small" variant={row.completed ? "filled" : "outlined"} />
       ),
@@ -73,6 +74,18 @@ export default function Schedules() {
       ),
     },
   ];
+
+
+  // to enable searching by exercise name
+  useEffect(() => {
+    if (schedules) {
+      const dd: ExerciseSchedule[] = schedules.map((item) => ({
+        ...item,
+        exerciseName: item["exerciseType.name"],
+      }))
+      setProcessedSchedules(dd);
+    }
+  }, [schedules]);
 
   return (
     <PageWrapper>
@@ -90,7 +103,7 @@ export default function Schedules() {
       {!isError && (
         <DataTable
           columns={columns}
-          data={schedules ?? []}
+          data={processedSchedules ?? []}
           getRowKey={(row) => row.id}
           loading={isLoading}
           emptyMessage="No schedules yet. Create your first schedule."

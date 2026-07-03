@@ -6,6 +6,8 @@ import { ExerciseType } from '../exercise-types/exercise-type.model';
 import { ExerciseCompletion } from '../exercise-completions/exercise-completion.model';
 import { CreateExerciseScheduleDto } from './dto/create-exercise-schedule.dto';
 
+const DAY_NAMES = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+
 @Injectable()
 export class ExerciseSchedulesRepository {
   constructor(
@@ -19,129 +21,137 @@ export class ExerciseSchedulesRepository {
     dto: CreateExerciseScheduleDto,
     userId: string,
   ): Promise<ExerciseSchedule> {
-    return this.exerciseScheduleModel.create({ ...dto, userId } as any);
+    const attrs: any = { ...dto, userId };
+    if (dto.recurrenceType === 'DAILY') {
+      delete attrs.weekdays;
+    }
+    return this.exerciseScheduleModel.create(attrs);
   }
 
-  async findAllByUser(userId: string): Promise<ExerciseSchedule[]> {
+  async findAllByUser(
+    userId: string,
+    raw: boolean = true,
+  ): Promise<ExerciseSchedule[]> {
     return this.exerciseScheduleModel.findAll({
       where: { userId },
       include: [ExerciseType],
+      raw,
     });
   }
 
   async findByDate(
     userId: string,
     date: string,
-  ): Promise<{
-    HOURLY: ExerciseSchedule[];
-    DAILY: ExerciseSchedule[];
-    WEEKLY: ExerciseSchedule[];
-  }> {
+  ): Promise<(ExerciseSchedule & { completed: boolean })[]> {
     const schedules = await this.findAllByUser(userId);
+    const { active, completedSet } =
+      await this.getActiveSchedulesWithCompletion(schedules, date);
+
+    return active.map((schedule) => ({
+      ...schedule,
+      completed: completedSet.has(schedule.id),
+    })) as (ExerciseSchedule & { completed: boolean })[];
+  }
+
+  private async getActiveSchedulesWithCompletion(
+    schedules: ExerciseSchedule[],
+    date: string,
+  ): Promise<{ active: ExerciseSchedule[]; completedSet: Set<string> }> {
     const target = new Date(date);
     target.setHours(0, 0, 0, 0);
 
     const dayEnd = new Date(target);
     dayEnd.setHours(23, 59, 59, 999);
 
-    const weekEnd = new Date(target);
-    weekEnd.setDate(weekEnd.getDate() + 7);
-
     const active = schedules.filter((schedule) => {
-      const start = new Date(schedule.get('startDatetime'));
+      const start = new Date(schedule.startDatetime);
       start.setHours(0, 0, 0, 0);
-
       if (target < start) return false;
 
-      const diffMs = target.getTime() - start.getTime();
-      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-      switch (schedule.get('recurrenceType')) {
+      switch (schedule.recurrenceType) {
         case 'DAILY':
-          return diffDays % schedule.get('recurrenceInterval') === 0;
-        case 'WEEKLY':
-          return (
-            Math.floor(diffDays / 7) % schedule.get('recurrenceInterval') === 0
-          );
-        case 'HOURLY':
           return true;
+        case 'WEEKLY': {
+          if (!schedule.weekdays || schedule.weekdays.length === 0)
+            return false;
+          return schedule.weekdays.includes(DAY_NAMES[target.getDay()]);
+        }
         default:
           return false;
       }
     });
 
-    const activeIds = active.map((s) => s.get('id'));
+    const activeIds = active.map((s) => s.id);
 
     const completions = await this.exerciseCompletionModel.findAll({
       where: {
         schedule_id: { [Op.in]: activeIds },
         completionDatetime: {
           [Op.gte]: target,
-          [Op.lt]: weekEnd,
+          [Op.lte]: dayEnd,
         },
       },
+      raw: true,
     });
 
-    const now = new Date();
-    const isToday =
-      target.getFullYear() === now.getFullYear() &&
-      target.getMonth() === now.getMonth() &&
-      target.getDate() === now.getDate();
+    const completedSet = new Set(completions.map((c) => c.scheduleId));
 
-    const currentHourStart = new Date(target);
-    currentHourStart.setHours(isToday ? now.getHours() : 0, 0, 0, 0);
-    const currentHourEnd = new Date(currentHourStart);
-    currentHourEnd.setHours(currentHourStart.getHours() + 1, 0, 0, 0);
+    return { active, completedSet };
+  }
 
-    const getMonday = (d: Date) => {
-      const m = new Date(d);
-      const day = m.getDay();
-      const diff = m.getDate() - day + (day === 0 ? -6 : 1);
-      m.setDate(diff);
-      m.setHours(0, 0, 0, 0);
-      return m;
-    };
+  async findWeekList(
+    userId: string,
+    weekStart: string,
+    weekEnd: string,
+  ): Promise<{
+    weekStart: string;
+    weekEnd: string;
+    days: {
+      date: string;
+      dayOfWeek: string;
+      exercises: {
+        id: string;
+        recurrenceType: string;
+        weekdays: string[] | null;
+        startDatetime: Date;
+        timezone: string;
+        completed: boolean;
+        exerciseType: { id: string; name: string; description: string | null };
+      }[];
+    }[];
+  }> {
+    const startDate = new Date(weekStart);
+    startDate.setHours(0, 0, 0, 0);
 
-    const weekStart = getMonday(target);
-    const weekEndDt = new Date(weekStart);
-    weekEndDt.setDate(weekEndDt.getDate() + 7);
+    const endDate = new Date(weekEnd);
+    endDate.setHours(23, 59, 59, 999);
 
-    const isCompleted = (scheduleId: string, type: string): boolean => {
-      return completions.some((c) => {
-        if (c.get('scheduleId') !== scheduleId) return false;
-        const cd = new Date(c.get('completionDatetime'));
+    const days: {
+      date: string;
+      dayOfWeek: string;
+      exercises: {
+        id: string;
+        recurrenceType: string;
+        weekdays: string[] | null;
+        startDatetime: Date;
+        timezone: string;
+        completed: boolean;
+        exerciseType: { id: string; name: string; description: string | null };
+      }[];
+    }[] = [];
 
-        switch (type) {
-          case 'DAILY':
-            return cd >= target && cd <= dayEnd;
-          case 'WEEKLY':
-            return cd >= weekStart && cd < weekEndDt;
-          case 'HOURLY':
-            return isToday && cd >= currentHourStart && cd < currentHourEnd;
-          default:
-            return false;
-        }
-      });
-    };
+    const current = new Date(startDate);
 
-    const grouped: {
-      HOURLY: ExerciseSchedule[];
-      DAILY: ExerciseSchedule[];
-      WEEKLY: ExerciseSchedule[];
-    } = {
-      HOURLY: [],
-      DAILY: [],
-      WEEKLY: [],
-    };
+    while (current <= endDate) {
+      const dateStr = current.toISOString().split('T')[0];
+      const dayOfWeek = DAY_NAMES[current.getDay()];
 
-    for (const schedule of active) {
-      const type = schedule.get('recurrenceType') as keyof typeof grouped;
-      if (!isCompleted(schedule.get('id'), type)) {
-        grouped[type].push(schedule);
-      }
+      const exercises = await this.findByDate(userId, dateStr);
+      days.push({ date: dateStr, dayOfWeek, exercises });
+      current.setDate(current.getDate() + 1);
     }
 
-    return grouped;
+    return { weekStart, weekEnd, days };
   }
 
   async findById(id: string): Promise<ExerciseSchedule | null> {

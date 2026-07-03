@@ -16,7 +16,7 @@ export const getProfileApi = async () => {
 };
 
 export const updateProfileApi = async (data: ProfileData) => {
-  const response = await api.put("/api/v1/users/me/profile", data);
+  const response = await api.patch("/api/v1/users/me", data);
   return response.data;
 };
 
@@ -29,7 +29,9 @@ export const getEmailPreferencesApi = async (): Promise<EmailPreferences> => {
   return response.data;
 };
 
-export const updateEmailPreferencesApi = async (prefs: EmailPreferences): Promise<EmailPreferences> => {
+export const updateEmailPreferencesApi = async (
+  prefs: EmailPreferences,
+): Promise<EmailPreferences> => {
   const response = await api.put("/api/v1/users/me/email-preferences", prefs);
   return response.data;
 };
@@ -40,12 +42,20 @@ export const loginApi = async (email: string, password: string) => {
     password,
   });
 
-  return response.data; 
+  return response.data;
   // expected: { token: "...", user: {...} }
 };
 
-export const registerApi = async (email: string, password: string, timezone: string) => {
-  const response = await api.post("/api/v1/auth/register", { email, password, timezone });
+export const registerApi = async (
+  email: string,
+  password: string,
+  timezone: string,
+) => {
+  const response = await api.post("/api/v1/auth/register", {
+    email,
+    password,
+    timezone,
+  });
   return response.data;
 };
 
@@ -55,6 +65,9 @@ export const forgotPasswordApi = async (email: string) => {
 };
 
 export const resetPasswordApi = async (token: string, password: string) => {
-  const response = await api.post("/v1/auth/reset-password", { token, password });
+  const response = await api.post("/v1/auth/reset-password", {
+    token,
+    password,
+  });
   return response.data;
 };

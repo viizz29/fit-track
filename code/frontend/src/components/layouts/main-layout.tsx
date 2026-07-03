@@ -16,8 +16,8 @@ import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import HistoryIcon from "@mui/icons-material/History";
 import AssessmentIcon from "@mui/icons-material/Assessment";
-import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import PersonIcon from "@mui/icons-material/Person";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import LogoutIcon from "@mui/icons-material/Logout";
 
 import { SidebarHeader } from "./sidebar-header-component";
@@ -44,9 +44,9 @@ const PageLayout = () => {
     "/exercises/create": { title: "New Exercise", subtitle: "Add an exercise to your library" },
     "/schedules": { title: "Schedules", subtitle: "Manage your workout schedules" },
     "/schedules/create": { title: "New Schedule", subtitle: "Create a workout schedule" },
-    "/scheduled-tasks": { title: "Today's Tasks", subtitle: "View and complete your tasks" },
     "/completions": { title: "Completions", subtitle: "History of completed exercises" },
     "/reports": { title: "Reports", subtitle: "Analytics and insights" },
+    "/calendar": { title: "Calendar", subtitle: "Today's schedule at a glance" },
     "/profile": { title: "Profile", subtitle: "Your account and preferences" },
   };
 
@@ -62,7 +62,7 @@ const PageLayout = () => {
     { label: "Dashboard", path: "/dashboard", icon: <DashboardIcon /> },
     { label: "Exercises", path: "/exercises", icon: <FitnessCenterIcon /> },
     { label: "Schedules", path: "/schedules", icon: <CalendarMonthIcon /> },
-    { label: "Today's Tasks", path: "/scheduled-tasks", icon: <TaskAltIcon /> },
+    { label: "Calendar", path: "/calendar", icon: <CalendarTodayIcon /> },
     { label: "Completions", path: "/completions", icon: <HistoryIcon /> },
     { label: "Reports", path: "/reports", icon: <AssessmentIcon /> },
     { label: "Profile", path: "/profile", icon: <PersonIcon /> },

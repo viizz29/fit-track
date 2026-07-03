@@ -1,8 +1,10 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Patch, Body } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('users')
 @Controller('v1/users')
 @ApiBearerAuth('bearerAuth')
 export class UsersController {
@@ -16,5 +18,14 @@ export class UsersController {
   @Get('me')
   getProfile(@CurrentUser() user: { userId: string }) {
     return this.usersService.findById(user.userId);
+  }
+
+  @Patch('me')
+  @ApiOperation({ summary: 'Update profile (name and/or email)' })
+  updateProfile(
+    @Body() dto: UpdateProfileDto,
+    @CurrentUser() user: { userId: string },
+  ) {
+    return this.usersService.update(user.userId, dto);
   }
 }

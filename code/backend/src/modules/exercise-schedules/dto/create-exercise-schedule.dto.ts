@@ -3,14 +3,18 @@ import {
   IsNotEmpty,
   IsString,
   IsEnum,
-  IsInt,
-  Min,
+  IsArray,
+  ArrayNotEmpty,
   IsDateString,
   MaxLength,
+  ValidateIf,
+  ArrayUnique,
 } from 'class-validator';
 
+export const VALID_WEEKDAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'] as const;
+export type Weekday = (typeof VALID_WEEKDAYS)[number];
+
 export enum RecurrenceType {
-  HOURLY = 'HOURLY',
   DAILY = 'DAILY',
   WEEKLY = 'WEEKLY',
 }
@@ -25,10 +29,16 @@ export class CreateExerciseScheduleDto {
   @IsEnum(RecurrenceType)
   recurrenceType: RecurrenceType;
 
-  @ApiProperty({ example: 1 })
-  @IsInt()
-  @Min(1)
-  recurrenceInterval: number;
+  @ApiProperty({
+    example: ['MON', 'WED', 'FRI'],
+    description: 'Required when recurrenceType is WEEKLY. Valid values: MON, TUE, WED, THU, FRI, SAT, SUN',
+  })
+  @ValidateIf(o => o.recurrenceType === RecurrenceType.WEEKLY)
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayUnique()
+  @IsString({ each: true })
+  weekdays?: string[];
 
   @ApiProperty({ example: '2026-07-01T08:00:00Z' })
   @IsDateString()

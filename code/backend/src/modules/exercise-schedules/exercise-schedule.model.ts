@@ -43,16 +43,16 @@ export class ExerciseSchedule extends Model {
   exerciseType!: ExerciseType;
 
   @Column({
-    type: DataType.ENUM('HOURLY', 'DAILY', 'WEEKLY'),
+    type: DataType.ENUM('DAILY', 'WEEKLY'),
     allowNull: false,
   })
   recurrenceType!: string;
 
   @Column({
-    type: DataType.INTEGER,
-    allowNull: false,
+    type: DataType.ARRAY(DataType.STRING(3)),
+    allowNull: true,
   })
-  recurrenceInterval!: number;
+  weekdays!: string[] | null;
 
   @Column({
     type: DataType.DATE,

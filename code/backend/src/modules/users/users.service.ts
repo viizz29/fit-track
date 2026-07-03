@@ -1,6 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { UserRepository } from './users.repository';
 import { User } from './user.model';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -20,6 +25,23 @@ export class UsersService {
     if (!user) return null;
     const { passwordHash, ...rest } = user.get({ plain: true }) as User;
     return rest;
+  }
+
+  async update(userId: string, dto: UpdateProfileDto) {
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (dto.email) {
+      const existing = await this.userRepository.findByEmail(dto.email);
+      if (existing && existing.get('userId') !== userId) {
+        throw new ConflictException('Email already in use');
+      }
+    }
+
+    await this.userRepository.update(userId, dto);
+    return this.findById(userId);
   }
 
   // This runs automatically when the module starts
