@@ -52,7 +52,7 @@ const UserMenu: React.FC = () => {
           color="primary"
           onClick={handleLogin}
         >
-          Login
+          {t("login")}
         </Button>
       ) : (
         <>
@@ -88,7 +88,7 @@ const UserMenu: React.FC = () => {
               </Typography>
             </Box>
             <MenuItem onClick={() => { handleClose(); navigate("/profile"); }}>
-              Profile
+              {t("Profile")}
             </MenuItem>
             <Divider />
             <MenuItem

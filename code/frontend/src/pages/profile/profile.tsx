@@ -13,13 +13,13 @@ import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import SettingsIcon from "@mui/icons-material/Settings";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import PageWrapper from "@/components/layouts/page-wrapper";
-// import PageHeader from "@/components/layouts/page-header";
 import StatCard from "@/components/data-display/stat-card";
 import LoadingState from "@/components/data-display/loading-state";
 import EmptyState from "@/components/data-display/empty-state";
@@ -30,6 +30,7 @@ import { getCompletionsApi } from "@/api/completions-api";
 import { updateProfileApi, updateEmailPreferencesApi, getProfileApi, getEmailPreferencesApi } from "@/api/auth-api";
 
 export default function ProfilePage() {
+  const { t } = useTranslation();
   const theme = useTheme();
   const { user, updateProfile } = useAuth();
   const [tab, setTab] = useState(0);
@@ -65,16 +66,16 @@ export default function ProfilePage() {
     mutationFn: updateProfileApi,
     onSuccess: (data) => {
       updateProfile(data);
-      toast.info("Profile updated");
+      toast.info(t("profileUpdated"));
     },
-    onError: () => toast.error("Failed to update profile"),
+    onError: () => toast.error(t("failedToUpdateProfile")),
   });
 
   const emailPrefsMutation = useMutation({
     mutationFn: updateEmailPreferencesApi,
-    onSuccess: () => toast.info("Email preferences updated"),
+    onSuccess: () => toast.info(t("emailPreferencesUpdated")),
     onError: () => {
-      toast.error("Failed to update email preferences");
+      toast.error(t("failedToUpdateEmailPreferences"));
       setEmailNotifications((prev) => !prev);
     },
   });
@@ -119,8 +120,8 @@ export default function ProfilePage() {
       {/* <PageHeader title="Profile" /> */}
 
       <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
-        <Tab icon={<VisibilityIcon />} label="Overview" iconPosition="start" />
-        <Tab icon={<SettingsIcon />} label="Settings" iconPosition="start" />
+        <Tab icon={<VisibilityIcon />} label={t("overview")} iconPosition="start" />
+        <Tab icon={<SettingsIcon />} label={t("settings")} iconPosition="start" />
       </Tabs>
 
       {/* ──────────────── TAB 0: OVERVIEW ──────────────── */}
@@ -132,7 +133,7 @@ export default function ProfilePage() {
                 {(user?.name?.[0] || user?.email?.[0] || "?").toUpperCase()}
               </Avatar>
               <Box sx={{ flex: 1 }}>
-                <Typography variant="h6">{user?.name || "Unnamed User"}</Typography>
+                <Typography variant="h6">{user?.name || t("unnamedUser")}</Typography>
                 <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mt: 0.5 }}>
                   <Chip icon={<EmailIcon />} label={user?.email || "—"} size="small" variant="outlined" />
                   <Chip icon={<AccessTimeIcon />} label={user?.timezone || "—"} size="small" variant="outlined" />
@@ -145,21 +146,21 @@ export default function ProfilePage() {
           </Paper>
 
           <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr 1fr" }, gap: 2, mb: 3 }}>
-            <StatCard icon={<FitnessCenterIcon color="primary" fontSize="small" />} label="Exercises" value={totalExercises} loading={loading} />
-            <StatCard icon={<CalendarMonthIcon color="secondary" fontSize="small" />} label="Schedules" value={totalSchedules} loading={loading} />
-            <StatCard icon={<CheckCircleIcon color="success" fontSize="small" />} label="Completions" value={totalCompletions} loading={loading} color="success.main" />
+            <StatCard icon={<FitnessCenterIcon color="primary" fontSize="small" />} label={t("Exercises")} value={totalExercises} loading={loading} />
+            <StatCard icon={<CalendarMonthIcon color="secondary" fontSize="small" />} label={t("Schedules")} value={totalSchedules} loading={loading} />
+            <StatCard icon={<CheckCircleIcon color="success" fontSize="small" />} label={t("Completions")} value={totalCompletions} loading={loading} color="success.main" />
           </Box>
 
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, md: 7 }}>
               <Paper variant="outlined" sx={{ borderRadius: 2, p: 2 }}>
                 <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
-                  This Week&apos;s Activity
+                  {t("thisWeeksActivity")}
                 </Typography>
                 {loading ? (
                   <LoadingState rows={1} height={200} />
                 ) : weeklyData.every((d) => d.completions === 0) ? (
-                  <EmptyState message="No activity this week." />
+                  <EmptyState message={t("noActivityThisWeek")} />
                 ) : (
                   <ResponsiveContainer width="100%" height={220}>
                     <BarChart data={weeklyData}>
@@ -167,7 +168,7 @@ export default function ProfilePage() {
                       <XAxis dataKey="date" tick={{ fontSize: 12 }} />
                       <YAxis allowDecimals={false} />
                       <Tooltip />
-                      <Bar dataKey="completions" name="Completions" fill={theme.palette.primary.main} radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="completions" name={t("Completions")} fill={theme.palette.primary.main} radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 )}
@@ -176,25 +177,25 @@ export default function ProfilePage() {
             <Grid size={{ xs: 12, md: 5 }}>
               <Paper variant="outlined" sx={{ borderRadius: 2 }}>
                 <Box sx={{ p: 2, pb: 0 }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>Recent Activity</Typography>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{t("recentActivity")}</Typography>
                 </Box>
                 {loading ? (
                   <LoadingState rows={4} height={36} />
                 ) : recentCompletions.length === 0 ? (
-                  <Box sx={{ p: 2 }}><EmptyState message="No completions yet." /></Box>
+                  <Box sx={{ p: 2 }}><EmptyState message={t("noCompletionsYet")} /></Box>
                 ) : (
                   <TableContainer>
                     <Table size="small">
                       <TableHead>
                         <TableRow>
-                          <TableCell>Exercise</TableCell>
-                          <TableCell>Date</TableCell>
+                          <TableCell>{t("exercise")}</TableCell>
+                          <TableCell>{t("date")}</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
                         {recentCompletions.map((c) => (
                           <TableRow key={c.id}>
-                            <TableCell>{c.schedule['exerciseType.name'] || c.scheduleTitle || "—"}</TableCell>
+                            <TableCell>{c['schedule.exerciseType.name'] || c.scheduleTitle || "—"}</TableCell>
                             <TableCell>
                               {new Date(c.completionDatetime).toLocaleDateString("en-US", {
                                 month: "short", day: "numeric",
@@ -216,10 +217,10 @@ export default function ProfilePage() {
       {tab === 1 && (
         <>
           <Paper variant="outlined" sx={{ borderRadius: 2, p: 3, mb: 3 }}>
-            <Typography variant="h6" sx={{ mb: 3 }}>Profile</Typography>
+            <Typography variant="h6" sx={{ mb: 3 }}>{t("Profile")}</Typography>
 
             {profileMutation.isError && (
-              <Alert severity="error" sx={{ mb: 2 }}>Failed to update profile</Alert>
+              <Alert severity="error" sx={{ mb: 2 }}>{t("failedToUpdateProfile")}</Alert>
             )}
 
             {profileQuery.isLoading ? (
@@ -235,19 +236,19 @@ export default function ProfilePage() {
 
                 }}
                 validationSchema={Yup.object({
-                  email: Yup.string().email("Invalid email").required("Required"),
+                  email: Yup.string().email(t("invalidEmail")).required(t("required")),
                   name: Yup.string(),
                 })}
                 onSubmit={(values) => profileMutation.mutate(values)}
               >
                 {({ handleSubmit, handleChange, values, errors, touched, dirty }) => (
                   <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2, maxWidth: 448 }}>
-                    <TextField fullWidth label="Email" name="email" value={values.email} onChange={handleChange} error={touched.email && !!errors.email} helperText={touched.email && typeof errors.email === "string" ? errors.email : undefined} />
-                    <TextField fullWidth label="Name" name="name" value={values.name} onChange={handleChange} error={touched.name && !!errors.name} helperText={touched.name && typeof errors.name === "string" ? errors.name : undefined} />
+                    <TextField fullWidth label={t("email")} name="email" value={values.email} onChange={handleChange} error={touched.email && !!errors.email} helperText={touched.email && typeof errors.email === "string" ? errors.email : undefined} />
+                    <TextField fullWidth label={t("name")} name="name" value={values.name} onChange={handleChange} error={touched.name && !!errors.name} helperText={touched.name && typeof errors.name === "string" ? errors.name : undefined} />
 
                     <Box sx={{ display: "flex", gap: 2 }}>
                       <Button type="submit" variant="contained" disabled={!dirty || profileMutation.isPending}>
-                        {profileMutation.isPending ? "Saving..." : "Save"}
+                        {profileMutation.isPending ? t("saving") : t("save")}
                       </Button>
                     </Box>
                   </Box>
@@ -257,7 +258,7 @@ export default function ProfilePage() {
           </Paper>
 
           <Paper variant="outlined" sx={{ borderRadius: 2, p: 3 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>Email Preferences</Typography>
+            <Typography variant="h6" sx={{ mb: 2 }}>{t("emailPreferences")}</Typography>
             {emailPrefsQuery.isLoading ? (
               <Skeleton width={280} height={40} />
             ) : (
@@ -269,7 +270,7 @@ export default function ProfilePage() {
                     disabled={emailPrefsMutation.isPending}
                   />
                 }
-                label="Receive email notifications"
+                label={t("receiveEmailNotifications")}
               />
             )}
           </Paper>

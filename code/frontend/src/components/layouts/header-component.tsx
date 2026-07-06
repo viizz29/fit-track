@@ -11,6 +11,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 
 import { ThemeToggleButton } from "@/components/layouts/theme-toggle-button";
 import UserMenu from "./user-menu";
+import LanguageSwitcher from "@/components/navigation/language-switcher";
 
 interface HeaderProps {
   isSidebarOpen: boolean;
@@ -57,6 +58,7 @@ export const Header: React.FC<HeaderProps> = ({
         </Box>
 
         <Stack direction="row" spacing={1} alignItems="center">
+          <LanguageSwitcher />
           <ThemeToggleButton />
           <UserMenu />
         </Stack>

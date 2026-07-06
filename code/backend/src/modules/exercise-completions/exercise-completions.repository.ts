@@ -52,6 +52,7 @@ export class ExerciseCompletionsRepository {
           include: [ExerciseType],
         },
       ],
+      raw: true,
     });
   }
 

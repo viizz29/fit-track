@@ -1,6 +1,7 @@
 import { Button, Box, TextField, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress } from "@mui/material";
 import { Formik } from "formik";
 import * as Yup from "yup";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { getExerciseApi, updateExerciseApi } from "@/api/exercises-api";
@@ -12,6 +13,7 @@ type EditExerciseDialogProps = {
 };
 
 export default function EditExerciseDialog({ open, exerciseId, onClose }: EditExerciseDialogProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   const { data: exercise, isLoading } = useQuery({
@@ -26,15 +28,15 @@ export default function EditExerciseDialog({ open, exerciseId, onClose }: EditEx
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["exercises"] });
       queryClient.invalidateQueries({ queryKey: ["exercise", exerciseId] });
-      toast.info("Exercise updated");
+      toast.info(t("exerciseUpdated"));
       onClose();
     },
-    onError: () => toast.error("Failed to update exercise"),
+    onError: () => toast.error(t("failedToUpdateExercise")),
   });
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Edit Exercise</DialogTitle>
+      <DialogTitle>{t("editExercise")}</DialogTitle>
       {isLoading || !exercise ? (
         <DialogContent sx={{ display: "flex", justifyContent: "center", py: 4 }}>
           <CircularProgress />
@@ -44,7 +46,7 @@ export default function EditExerciseDialog({ open, exerciseId, onClose }: EditEx
           enableReinitialize
           initialValues={{ name: exercise.name, description: exercise.description || "" }}
           validationSchema={Yup.object({
-            name: Yup.string().required("Required"),
+            name: Yup.string().required(t("required")),
             description: Yup.string(),
           })}
           onSubmit={(values) => mutation.mutate(values)}
@@ -54,12 +56,12 @@ export default function EditExerciseDialog({ open, exerciseId, onClose }: EditEx
               <DialogContent>
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                   <TextField
-                    fullWidth label="Exercise Name" name="name"
+                    fullWidth label={t("exerciseName")} name="name"
                     value={values.name} onChange={handleChange}
                     error={touched.name && !!errors.name} helperText={touched.name && errors.name}
                   />
                   <TextField
-                    fullWidth label="Description" name="description"
+                    fullWidth label={t("description")} name="description"
                     value={values.description} onChange={handleChange}
                     error={touched.description && !!errors.description} helperText={touched.description && errors.description}
                     multiline rows={3}
@@ -67,9 +69,9 @@ export default function EditExerciseDialog({ open, exerciseId, onClose }: EditEx
                 </Box>
               </DialogContent>
               <DialogActions>
-                <Button onClick={() => { resetForm(); onClose(); }}>Cancel</Button>
+                <Button onClick={() => { resetForm(); onClose(); }}>{t("cancel")}</Button>
                 <Button type="submit" variant="contained" disabled={mutation.isPending}>
-                  {mutation.isPending ? "Saving..." : "Save"}
+                  {mutation.isPending ? t("saving") : t("save")}
                 </Button>
               </DialogActions>
             </Box>

@@ -2,9 +2,12 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { Controller, Get, Post, Body } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
+import { ResendVerificationDto } from './dto/resend-verification.dto';
 import { Public } from 'src/common/decorators/public.decorator';
 
-@ApiTags('auth') // Groups these endpoints under "auth" in the UI
+@ApiTags('auth')
 @Controller('v1/auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
@@ -16,9 +19,39 @@ export class AuthController {
   }
 
   @Public()
+  @ApiOperation({ summary: 'Register a new user' })
+  @ApiBody({ type: RegisterDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Account created, verification email sent.',
+  })
+  @ApiResponse({ status: 409, description: 'Email already in use.' })
   @Post('register')
-  register(@Body() body: { name: string; email: string; password: string }) {
-    return this.authService.register(body.name, body.email, body.password);
+  register(@Body() dto: RegisterDto) {
+    return this.authService.register(dto.name, dto.email, dto.password);
+  }
+
+  @Public()
+  @ApiOperation({ summary: 'Verify email with token' })
+  @ApiBody({ type: VerifyEmailDto })
+  @ApiResponse({ status: 200, description: 'Email verified successfully.' })
+  @ApiResponse({ status: 400, description: 'Invalid or expired token.' })
+  @Post('verify-email')
+  verifyEmail(@Body() dto: VerifyEmailDto) {
+    return this.authService.verifyEmail(dto.token);
+  }
+
+  @Public()
+  @ApiOperation({ summary: 'Resend verification email' })
+  @ApiBody({ type: ResendVerificationDto })
+  @ApiResponse({ status: 200, description: 'Verification email resent.' })
+  @ApiResponse({
+    status: 400,
+    description: 'No account found or already verified.',
+  })
+  @Post('resend-verification')
+  resendVerification(@Body() dto: ResendVerificationDto) {
+    return this.authService.resendVerification(dto.email);
   }
 
   @Public()

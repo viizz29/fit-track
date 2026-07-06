@@ -16,6 +16,7 @@ import {
   PieChart, Pie, Cell, AreaChart, Area, CartesianGrid, Legend,
 } from "recharts";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import PageWrapper from "@/components/layouts/page-wrapper";
 import DataTable from "@/components/data-display/data-table";
 import { getSchedulesApi } from "@/api/schedules-api";
@@ -42,9 +43,9 @@ function countExpectedOccurrences(startTime: string, recurrenceType?: string, _r
   }
 }
 
-function getRecurrenceLabel(recurrenceType?: string, _recurrenceInterval?: number, weekdays?: string[]): string {
-  if (!recurrenceType) return "One-time";
-  if (recurrenceType === "WEEKLY" && weekdays?.length) return `Weekly · ${weekdays.join(", ")}`;
+function getRecurrenceLabel(t: (key: string, opts?: any) => string, recurrenceType?: string, _recurrenceInterval?: number, weekdays?: string[]): string {
+  if (!recurrenceType) return t("oneTime");
+  if (recurrenceType === "WEEKLY" && weekdays?.length) return t("weeklyWithDays", { days: weekdays.join(", ") });
   return recurrenceType.charAt(0).toUpperCase() + recurrenceType.slice(1).toLowerCase();
 }
 
@@ -53,7 +54,7 @@ type FrequencyRow = { exerciseName: string; count: number };
 function computeExerciseFrequency(completions: CompletionRecord[]): FrequencyRow[] {
   const map = new Map<string, number>();
   for (const c of completions) {
-    const name = c.exerciseName || c.scheduleTitle || "Unknown";
+    const name = c['schedule.exerciseType.name'] || c.scheduleTitle || "Unknown";
     map.set(name, (map.get(name) || 0) + 1);
   }
   return Array.from(map.entries())
@@ -70,7 +71,7 @@ type AdherenceRow = {
   adherenceRate: number;
 };
 
-function computeScheduleAdherence(schedules: ExerciseSchedule[], completions: CompletionRecord[]): AdherenceRow[] {
+function computeScheduleAdherence(t: (key: string, opts?: any) => string, schedules: ExerciseSchedule[], completions: CompletionRecord[]): AdherenceRow[] {
   const completionsBySchedule = new Map<string, CompletionRecord[]>();
   for (const c of completions) {
     if (!completionsBySchedule.has(c.scheduleId)) completionsBySchedule.set(c.scheduleId, []);
@@ -85,7 +86,7 @@ function computeScheduleAdherence(schedules: ExerciseSchedule[], completions: Co
     rows.push({
       scheduleTitle: s.title,
       exerciseName: s["exerciseType.name"],
-      recurrence: getRecurrenceLabel(s.recurrenceType, undefined, s.weekdays),
+      recurrence: getRecurrenceLabel(t, s.recurrenceType, undefined, s.weekdays),
       totalOccurrences,
       completedOnTime: Math.min(completedOnTime, totalOccurrences),
       adherenceRate: Math.min(completedOnTime / totalOccurrences, 1),
@@ -118,6 +119,7 @@ function TabPanel({ children, value, index }: TabPanelProps) {
 }
 
 export default function Reports() {
+  const { t } = useTranslation();
   const theme = useTheme();
   const [tab, setTab] = useState(0);
   const [startDate, setStartDate] = useState<Dayjs | null>(dayjs().subtract(30, "day"));
@@ -163,27 +165,26 @@ export default function Reports() {
   }, [completionsQuery.data, startDate, endDate]);
 
   const frequencyData = useMemo(() => computeExerciseFrequency(filteredCompletions), [filteredCompletions]);
-  const adherenceData = useMemo(() => computeScheduleAdherence(schedulesQuery.data || [], filteredCompletions), [schedulesQuery.data, filteredCompletions]);
+  const adherenceData = useMemo(() => computeScheduleAdherence(t, schedulesQuery.data || [], filteredCompletions), [t, schedulesQuery.data, filteredCompletions]);
 
   const rateColumns: Column<CompletionRatePerExercise>[] = [
-    { key: "exerciseName", label: "Exercise", sortable: true },
-    { key: "totalScheduled", label: "Scheduled", sortable: true, align: "center" },
-    { key: "totalCompleted", label: "Completed", sortable: true, align: "center" },
-    { key: "rate", label: "Rate", sortable: true, render: (row) => <RateBar value={row.rate} /> },
+    { key: "exerciseName", label: t("exercise"), sortable: true },
+    { key: "totalScheduled", label: t("scheduled"), sortable: true, align: "center" },
+    { key: "totalCompleted", label: t("Completed"), sortable: true, align: "center" },
+    { key: "rate", label: t("rate"), sortable: true, render: (row) => <RateBar value={row.rate} /> },
   ];
 
   const freqColumns: Column<FrequencyRow>[] = [
-    { key: "exerciseName", label: "Exercise", sortable: true },
-    { key: "count", label: "Count", sortable: true, align: "center" },
+    { key: "exerciseName", label: t("exercise"), sortable: true },
+    { key: "count", label: t("count"), sortable: true, align: "center" },
   ];
 
   const adherenceColumns: Column<AdherenceRow>[] = [
-    { key: "scheduleTitle", label: "Schedule", sortable: true },
-    { key: "exerciseName", label: "Exercise", sortable: true, render: (row) => row.exerciseName || "—" },
-    { key: "recurrence", label: "Recurrence", render: (row) => <Chip label={row.recurrence} size="small" variant="outlined" /> },
-    { key: "totalOccurrences", label: "Expected", sortable: true, align: "center" },
-    { key: "completedOnTime", label: "Completed", sortable: true, align: "center" },
-    { key: "adherenceRate", label: "Adherence", render: (row) => <RateBar value={row.adherenceRate} /> },
+    { key: "exerciseName", label: t("exercise"), sortable: true, render: (row) => row.exerciseName || "—" },
+    { key: "recurrence", label: t("recurrence"), render: (row) => <Chip label={row.recurrence} size="small" variant="outlined" /> },
+    { key: "totalOccurrences", label: t("expected"), sortable: true, align: "center" },
+    { key: "completedOnTime", label: t("Completed"), sortable: true, align: "center" },
+    { key: "adherenceRate", label: t("adherence"), render: (row) => <RateBar value={row.adherenceRate} /> },
   ];
 
   return (
@@ -193,31 +194,31 @@ export default function Reports() {
       <Paper variant="outlined" sx={{ p: 2, mb: 2, borderRadius: 2 }}>
         <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", alignItems: "center" }}>
           <DatePicker
-            label="From"
+            label={t("from")}
             value={startDate}
             onChange={(v) => setStartDate(v)}
             format="YYYY-MM-DD"
             slotProps={{ textField: { size: "small", sx: { width: 160 } } }}
           />
           <DatePicker
-            label="To"
+            label={t("to")}
             value={endDate}
             onChange={(v) => setEndDate(v)}
             format="YYYY-MM-DD"
             slotProps={{ textField: { size: "small", sx: { width: 160 } } }}
           />
-          <Button variant="contained" onClick={() => setDateKey((k) => k + 1)}>Apply</Button>
+          <Button variant="contained" onClick={() => setDateKey((k) => k + 1)}>{t("apply")}</Button>
         </Box>
       </Paper>
 
       <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
-        <Tab icon={<BarChartIcon />} label="Completion Rate" iconPosition="start" />
-        {!isMobile && <Tab icon={<CheckCircleIcon />} label="Exercise Frequency" iconPosition="start" />}
-        {!isMobile && <Tab icon={<CancelIcon />} label="Schedule Adherence" iconPosition="start" />}
-        {!isMobile && <Tab icon={<EventBusyIcon />} label="Missed Exercises" iconPosition="start" />}
+        <Tab icon={<BarChartIcon />} label={t("completionRate")} iconPosition="start" />
+        {!isMobile && <Tab icon={<CheckCircleIcon />} label={t("exerciseFrequency")} iconPosition="start" />}
+        {!isMobile && <Tab icon={<CancelIcon />} label={t("scheduleAdherence")} iconPosition="start" />}
+        {!isMobile && <Tab icon={<EventBusyIcon />} label={t("missedExercises")} iconPosition="start" />}
       </Tabs>
 
-      {error && <Alert severity="error" sx={{ mb: 2 }}>Failed to load report data</Alert>}
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{t("failedToLoadReportData")}</Alert>}
 
       <TabPanel value={tab} index={0}>
         {completionRateQuery.isLoading ? (
@@ -225,16 +226,16 @@ export default function Reports() {
             {[1, 2, 3, 4].map((i) => <Skeleton key={i} variant="rounded" height={52} />)}
           </Box>
         ) : completionRateQuery.error ? (
-          <Alert severity="error">Failed to load completion rate report</Alert>
+          <Alert severity="error">{t("failedToLoadCompletionRateReport")}</Alert>
         ) : !completionRateQuery.data ? (
-          <Alert severity="info">Select a date range and click Apply.</Alert>
+          <Alert severity="info">{t("selectDateRangeAndApply")}</Alert>
         ) : (
           <>
             <Grid container spacing={2} sx={{ mb: 3 }}>
               <Grid size={{ xs: 12, sm: 4 }}>
                 <Card variant="outlined" sx={{ borderRadius: 2 }}>
                   <CardContent>
-                    <Typography variant="overline" color="text.secondary">Completion Rate</Typography>
+                    <Typography variant="overline" color="text.secondary">{t("completionRate")}</Typography>
                     <Typography variant="h3" color={
                       completionRateQuery.data.overallRate >= 0.8 ? "success.main"
                         : completionRateQuery.data.overallRate >= 0.5 ? "warning.main"
@@ -249,7 +250,7 @@ export default function Reports() {
                 <Card variant="outlined" sx={{ borderRadius: 2 }}>
                   <CardContent>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <Typography variant="overline" color="text.secondary">Current Streak</Typography>
+                      <Typography variant="overline" color="text.secondary">{t("currentStreak")}</Typography>
                       <WhatshotIcon color="warning" fontSize="small" />
                     </Box>
                     <Typography variant="h3" color="warning.main">{completionRateQuery.data.currentStreak}</Typography>
@@ -259,7 +260,7 @@ export default function Reports() {
               <Grid size={{ xs: 12, sm: 4 }}>
                 <Card variant="outlined" sx={{ borderRadius: 2 }}>
                   <CardContent>
-                    <Typography variant="overline" color="text.secondary">Exercises Tracked</Typography>
+                    <Typography variant="overline" color="text.secondary">{t("exercisesTracked")}</Typography>
                     <Typography variant="h3" color="info.main">{completionRateQuery.data.exerciseBreakdown.length}</Typography>
                   </CardContent>
                 </Card>
@@ -269,14 +270,14 @@ export default function Reports() {
             <Grid container spacing={2} sx={{ mb: 3 }}>
               <Grid size={{ xs: 12, md: 4 }}>
                 <Paper variant="outlined" sx={{ p: 2, borderRadius: 2, height: "100%" }}>
-                  <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>Completed vs Missed</Typography>
+                  <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>{t("completedVsMissed")}</Typography>
                   {(() => {
                     const total = completionRateQuery.data.exerciseBreakdown.reduce((s, r) => s + r.totalScheduled, 0);
                     const completed = completionRateQuery.data.exerciseBreakdown.reduce((s, r) => s + r.totalCompleted, 0);
                     const missed = total - completed;
                     const pieData = [
-                      { name: "Completed", value: Math.max(completed, 0) },
-                      { name: "Missed", value: Math.max(missed, 0) },
+                      { name: t("Completed"), value: Math.max(completed, 0) },
+                      { name: t("missed"), value: Math.max(missed, 0) },
                     ];
                     return (
                       <ResponsiveContainer width="100%" height={200}>
@@ -314,12 +315,12 @@ export default function Reports() {
             {[1, 2, 3, 4].map((i) => <Skeleton key={i} variant="rounded" height={52} />)}
           </Box>
         ) : frequencyData.length === 0 ? (
-          <Alert severity="info">No completions recorded yet.</Alert>
+          <Alert severity="info">{t("noCompletionsRecordedYet")}</Alert>
         ) : (
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, md: 7 }}>
               <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
-                <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>Completions by Exercise</Typography>
+                <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>{t("completionsByExercise")}</Typography>
                 <ResponsiveContainer width="100%" height={Math.max(200, frequencyData.length * 50)}>
                   <BarChart data={frequencyData} layout="vertical" margin={{ left: 20, right: 20, top: 5, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" horizontal={false} />
@@ -344,7 +345,7 @@ export default function Reports() {
             {[1, 2, 3, 4].map((i) => <Skeleton key={i} variant="rounded" height={52} />)}
           </Box>
         ) : adherenceData.length === 0 ? (
-          <Alert severity="info">No schedule data available yet.</Alert>
+          <Alert severity="info">{t("noScheduleDataAvailableYet")}</Alert>
         ) : (
           <DataTable columns={adherenceColumns} data={adherenceData} getRowKey={(row) => row.scheduleTitle} searchable={false} pageSize={10} />
         )}
@@ -356,16 +357,16 @@ export default function Reports() {
             {[1, 2, 3, 4].map((i) => <Skeleton key={i} variant="rounded" height={52} />)}
           </Box>
         ) : missedQuery.error ? (
-          <Alert severity="error">Failed to load missed exercises report</Alert>
+          <Alert severity="error">{t("failedToLoadMissedExercisesReport")}</Alert>
         ) : !missedQuery.data ? (
-          <Alert severity="info">Select a date range and click Apply.</Alert>
+          <Alert severity="info">{t("selectDateRangeAndApply")}</Alert>
         ) : (
           <>
             <Grid container spacing={2} sx={{ mb: 3 }}>
               <Grid size={{ xs: 12, sm: 4 }}>
                 <Card variant="outlined" sx={{ borderRadius: 2 }}>
                   <CardContent>
-                    <Typography variant="overline" color="text.secondary">Total Missed</Typography>
+                    <Typography variant="overline" color="text.secondary">{t("totalMissed")}</Typography>
                     <Typography variant="h3" color="error.main">{missedQuery.data.totalMissed}</Typography>
                   </CardContent>
                 </Card>
@@ -373,7 +374,7 @@ export default function Reports() {
               <Grid size={{ xs: 12, sm: 4 }}>
                 <Card variant="outlined" sx={{ borderRadius: 2 }}>
                   <CardContent>
-                    <Typography variant="overline" color="text.secondary">Daily Average</Typography>
+                    <Typography variant="overline" color="text.secondary">{t("dailyAverage")}</Typography>
                     <Typography variant="h3" color="warning.main">
                       {missedQuery.data.dailyBreakdown.length > 0
                         ? (missedQuery.data.totalMissed / missedQuery.data.dailyBreakdown.length).toFixed(1)
@@ -385,7 +386,7 @@ export default function Reports() {
               <Grid size={{ xs: 12, sm: 4 }}>
                 <Card variant="outlined" sx={{ borderRadius: 2 }}>
                   <CardContent>
-                    <Typography variant="overline" color="text.secondary">Days with Misses</Typography>
+                    <Typography variant="overline" color="text.secondary">{t("daysWithMisses")}</Typography>
                     <Typography variant="h3" color="info.main">
                       {missedQuery.data.dailyBreakdown.filter((d) => d.missedCount > 0).length}
                     </Typography>
@@ -395,9 +396,9 @@ export default function Reports() {
             </Grid>
 
             <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
-              <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>Missed Exercises Trend</Typography>
+              <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>{t("missedExercisesTrend")}</Typography>
               {missedQuery.data.dailyBreakdown.length === 0 ? (
-                <Alert severity="info">No data for the selected date range.</Alert>
+                <Alert severity="info">{t("noDataForSelectedRange")}</Alert>
               ) : (
                 <Grid container spacing={2}>
                   <Grid size={{ xs: 12, md: 8 }}>

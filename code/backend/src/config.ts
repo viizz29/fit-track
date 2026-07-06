@@ -6,6 +6,7 @@ process.env.TZ = 'America/Danmarkshavn'; // set the timezone for the config valu
 export * from './configs/base';
 export * from './configs/common';
 export * from './configs/socketio-server';
+export * from './configs/email-and-sms';
 
 delete originalEnv.NODE_ENV;
 process.env = { ...originalEnv }; // restore the config

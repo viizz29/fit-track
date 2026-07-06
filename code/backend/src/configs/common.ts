@@ -131,15 +131,15 @@ export const FRONTEND_DEPLOYMENT_LOCATION = process.env
   ? process.env.FRONTEND_DEPLOYMENT_LOCATION
   : '/var/www/magic-web';
 
+export const VERIFICATION_TOKEN_EXPIRY_HOURS = process.env
+  .VERIFICATION_TOKEN_EXPIRY_HOURS
+  ? Number(process.env.VERIFICATION_TOKEN_EXPIRY_HOURS)
+  : 24;
+
 export const ENABLE_NOTIFICATION_EMAILS = process.env.ENABLE_NOTIFICATION_EMAILS
   ? process.env.ENABLE_NOTIFICATION_EMAILS === 'true'
   : false;
-export const MAIL_SENDING_ID = process.env.MAIL_SENDING_ID
-  ? process.env.MAIL_SENDING_ID
-  : 'xyz@xyzabc3232.com';
-export const MAIL_SENDING_ID_PASSWORD = process.env.MAIL_SENDING_ID_PASSWORD
-  ? process.env.MAIL_SENDING_ID_PASSWORD
-  : 'password';
+
 export const PROJECT_CONFIGS_LOCATION = `${PROJECT_LOCATION}/project-configs`;
 
 export const DIARY_DEPLOYMENT_LOCATION = process.env.DIARY_DEPLOYMENT_LOCATION

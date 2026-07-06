@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Op, fn, col, literal } from 'sequelize';
 import { ExerciseSchedule } from '../exercise-schedules/exercise-schedule.model';
 import { ExerciseCompletion } from '../exercise-completions/exercise-completion.model';
+import { ExerciseType } from '../exercise-types/exercise-type.model';
 
 @Injectable()
 export class ReportsService {
@@ -51,16 +52,103 @@ export class ReportsService {
   async getMissed(userId: string, startDate: string, endDate: string) {
     const schedules = await this.scheduleModel.findAll({
       where: { user_id: userId },
+      raw: true,
     });
 
     const start = new Date(startDate);
     const end = new Date(endDate);
-    const results: {
-      schedule_id: string;
-      name: string;
-      expected: number;
-      completed: number;
-      missed: number;
+
+    const expectedByDate: Map<string, number> = new Map();
+
+    for (const schedule of schedules) {
+      const scheduleStart = new Date(schedule.startDatetime);
+      const effectiveStart = scheduleStart > start ? scheduleStart : start;
+
+      if (effectiveStart > end) continue;
+
+      const expectedDates = this.getExpectedDates(
+        schedule.recurrenceType,
+        schedule.weekdays,
+        effectiveStart,
+        end,
+      );
+
+      for (const date of expectedDates) {
+        expectedByDate.set(date, (expectedByDate.get(date) || 0) + 1);
+      }
+    }
+
+    const allDates = this.getDateRange(start, end);
+    const scheduleIds = schedules.map((s) => s.id);
+
+    const completions = await this.completionModel.findAll({
+      attributes: [
+        [fn('DATE', col('completion_datetime')), 'date'],
+        [fn('COUNT', col('id')), 'count'],
+      ],
+      where: {
+        schedule_id: { [Op.in]: scheduleIds },
+        completion_datetime: {
+          [Op.gte]: start.toISOString(),
+          [Op.lte]: end.toISOString(),
+        },
+      },
+      group: [fn('DATE', col('completion_datetime'))],
+      raw: true,
+    });
+
+    const completedByDate: Map<string, number> = new Map();
+    for (const c of completions) {
+      const row = c as unknown as { date: string; count: number };
+      completedByDate.set(row.date, row.count);
+    }
+
+    const dateWiseMissed: {
+      date: string;
+      missedCount: number;
+    }[] = [];
+    let totalMissed = 0;
+
+    for (const date of allDates) {
+      const expected = expectedByDate.get(date) || 0;
+      const completed = completedByDate.get(date) || 0;
+      const missedCount = Math.max(0, expected - completed);
+      if (missedCount > 0) {
+        dateWiseMissed.push({ date, missedCount });
+        totalMissed += missedCount;
+      }
+    }
+
+    return {
+      totalMissed,
+      dailyBreakdown: dateWiseMissed,
+    };
+  }
+
+  async getCompletionRate(userId: string, startDate: string, endDate: string) {
+    const schedules = await this.scheduleModel.findAll({
+      where: { user_id: userId },
+      include: [ExerciseType],
+      raw: true,
+    });
+
+    const start = new Date(startDate);
+    let end = new Date(endDate);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (end >= today) {
+      end = new Date(today.getTime() - 1);
+    }
+
+    let totalExpected = 0;
+    let totalCompleted = 0;
+    const dailyCompletions: Set<string> = new Set();
+    const exerciseBreakdown: {
+      exerciseName: string;
+      totalScheduled: number;
+      totalCompleted: number;
+      rate: number;
     }[] = [];
 
     for (const schedule of schedules) {
@@ -69,62 +157,9 @@ export class ReportsService {
 
       if (effectiveStart > end) continue;
 
-      const completions = await this.completionModel.count({
-        where: {
-          schedule_id: schedule.id,
-          completion_datetime: {
-            [Op.gte]: effectiveStart.toISOString(),
-            [Op.lte]: end.toISOString(),
-          },
-        },
-      });
-
       const expected = this.calculateExpectedOccurrences(
         schedule.recurrenceType,
         schedule.weekdays,
-        effectiveStart,
-        end,
-      );
-
-      const missed = Math.max(0, expected - completions);
-
-      results.push({
-        schedule_id: schedule.id,
-        name: `Schedule ${schedule.id}`,
-        expected,
-        completed: completions,
-        missed,
-      });
-    }
-
-    return {
-      totalExpected: results.reduce((s, r) => s + r.expected, 0),
-      totalCompleted: results.reduce((s, r) => s + r.completed, 0),
-      totalMissed: results.reduce((s, r) => s + r.missed, 0),
-      details: results.filter((r) => r.missed > 0),
-    };
-  }
-
-  async getCompletionRate(userId: string, startDate: string, endDate: string) {
-    const schedules = await this.scheduleModel.findAll({
-      where: { user_id: userId },
-    });
-
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    let totalExpected = 0;
-    let totalCompleted = 0;
-    const dailyCompletions: Set<string> = new Set();
-
-    for (const schedule of schedules) {
-      const scheduleStart = new Date(schedule.get('startDatetime'));
-      const effectiveStart = scheduleStart > start ? scheduleStart : start;
-
-      if (effectiveStart > end) continue;
-
-      const expected = this.calculateExpectedOccurrences(
-        schedule.get('recurrenceType'),
-        schedule.get('weekdays'),
         effectiveStart,
         end,
       );
@@ -138,15 +173,24 @@ export class ReportsService {
             [Op.lte]: end.toISOString(),
           },
         },
+        raw: true,
       });
-      totalCompleted += completions.length;
+      const completed = completions.length;
+      totalCompleted += completed;
 
       for (const c of completions) {
-        const d = new Date(c.get('completionDatetime'))
-          .toISOString()
-          .slice(0, 10);
+        const d = new Date(c.completionDatetime).toISOString().slice(0, 10);
         dailyCompletions.add(d);
       }
+
+      console.log(schedule);
+
+      exerciseBreakdown.push({
+        exerciseName: schedule['exerciseType.name'] as string,
+        totalScheduled: expected,
+        totalCompleted: completed,
+        rate: completed / expected,
+      });
     }
 
     const rate = totalExpected > 0 ? totalCompleted / totalExpected : 0;
@@ -159,7 +203,7 @@ export class ReportsService {
       expected: totalExpected,
       currentStreak: streakData.currentStreak,
       longestStreak: streakData.longestStreak,
-      exerciseBreakdown: [],
+      exerciseBreakdown,
     };
   }
 
@@ -173,7 +217,11 @@ export class ReportsService {
 
     switch (recurrenceType) {
       case 'DAILY':
-        return Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+        return (
+          Math.floor(
+            (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
+          ) + 1
+        );
       case 'WEEKLY': {
         if (!weekdays || weekdays.length === 0) return 0;
         const daySet = new Set(weekdays);
@@ -199,6 +247,38 @@ export class ReportsService {
       dates.push(current.toISOString().slice(0, 10));
       current.setDate(current.getDate() + 1);
     }
+    return dates;
+  }
+
+  private getExpectedDates(
+    recurrenceType: string,
+    weekdays: string[] | null,
+    start: Date,
+    end: Date,
+  ): string[] {
+    const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+    const dates: string[] = [];
+    const current = new Date(start);
+
+    switch (recurrenceType) {
+      case 'DAILY':
+        while (current <= end) {
+          dates.push(current.toISOString().slice(0, 10));
+          current.setDate(current.getDate() + 1);
+        }
+        break;
+      case 'WEEKLY':
+        if (!weekdays || weekdays.length === 0) return [];
+        const daySet = new Set(weekdays);
+        while (current <= end) {
+          if (daySet.has(dayNames[current.getDay()])) {
+            dates.push(current.toISOString().slice(0, 10));
+          }
+          current.setDate(current.getDate() + 1);
+        }
+        break;
+    }
+
     return dates;
   }
 

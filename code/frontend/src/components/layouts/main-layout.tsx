@@ -38,25 +38,24 @@ const PageLayout = () => {
   const toggleSidebar = () => setMobileOpen((prev) => !prev);
   const { pathname } = useLocation();
 
-  const pageConfig: Record<string, { title: string; subtitle: string }> = {
-    "/dashboard": { title: "Dashboard", subtitle: "Overview of your activity" },
-    "/exercises": { title: "Exercises", subtitle: "Manage your exercise library" },
-    "/exercises/create": { title: "New Exercise", subtitle: "Add an exercise to your library" },
-    "/schedules": { title: "Schedules", subtitle: "Manage your workout schedules" },
-    "/schedules/create": { title: "New Schedule", subtitle: "Create a workout schedule" },
-    "/completions": { title: "Completions", subtitle: "History of completed exercises" },
-    "/reports": { title: "Reports", subtitle: "Analytics and insights" },
-    "/calendar": { title: "Calendar", subtitle: "Today's schedule at a glance" },
-    "/profile": { title: "Profile", subtitle: "Your account and preferences" },
-  };
-
   const currentPage = useMemo(() => {
+    const pageConfig: Record<string, { title: string; subtitle: string }> = {
+      "/dashboard": { title: t("Dashboard"), subtitle: t("overviewOfYourActivity") },
+      "/exercises": { title: t("Exercises"), subtitle: t("manageYourExerciseLibrary") },
+      "/exercises/create": { title: t("newExercise"), subtitle: t("addAnExerciseToYourLibrary") },
+      "/schedules": { title: t("Schedules"), subtitle: t("manageYourWorkoutSchedules") },
+      "/schedules/create": { title: t("newSchedule"), subtitle: t("createAWorkoutSchedule") },
+      "/completions": { title: t("Completions"), subtitle: t("historyOfCompletedExercises") },
+      "/reports": { title: t("Reports"), subtitle: t("analyticsAndInsights") },
+      "/calendar": { title: t("Calendar"), subtitle: t("todaysScheduleAtAGlance") },
+      "/profile": { title: t("Profile"), subtitle: t("yourAccountAndPreferences") },
+    };
     const exact = pageConfig[pathname];
     if (exact) return exact;
     if (pathname.startsWith("/exercises/edit/")) return pageConfig["/exercises"];
     if (pathname.startsWith("/schedules/edit/")) return pageConfig["/schedules"];
     return { title: "FitTrack", subtitle: "" };
-  }, [pathname]);
+  }, [pathname, t]);
 
   const menuItems = [
     { label: "Dashboard", path: "/dashboard", icon: <DashboardIcon /> },

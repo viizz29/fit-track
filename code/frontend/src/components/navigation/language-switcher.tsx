@@ -26,7 +26,7 @@ export default function LanguageSwitcher() {
   }, []);
 
   return (
-    <FormControl size="small" sx={{ minWidth: 140 }}>
+    <FormControl size="small" sx={{ minWidth: 60 }}>
       <InputLabel id="language-label">Language</InputLabel>
 
       <Select
@@ -35,7 +35,7 @@ export default function LanguageSwitcher() {
         label="Language"
         onChange={handleChange}
       >
-        <MenuItem value="en">English</MenuItem>
+        <MenuItem value="en">Eng</MenuItem>
         <MenuItem value="hi">हिंदी</MenuItem>
         {/* <MenuItem value="bn">Bengali</MenuItem>
         <MenuItem value="fr">French</MenuItem> */}

@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { Box, Paper, Typography, Alert, Chip } from "@mui/material";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
@@ -18,6 +19,7 @@ import type { ExerciseSchedule } from "@/api/schedules-api";
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const today = dayjs().format("YYYY-MM-DD");
 
@@ -40,9 +42,9 @@ export default function Dashboard() {
       completeExerciseApi(scheduleId, new Date().toISOString()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["scheduled-tasks"] });
-      toast.info("Exercise marked as complete");
+      toast.info(t("exerciseMarkedComplete"));
     },
-    onError: () => toast.error("Failed to mark exercise as complete"),
+    onError: () => toast.error(t("failedToMarkComplete")),
   });
 
   const allToday = useMemo(() => schedules ?? [], [schedules]);
@@ -64,13 +66,13 @@ export default function Dashboard() {
   return (
     <PageWrapper>
       <Typography variant="h5" sx={{ mb: 3 }}>
-        Welcome{user?.name ? `, ${user.name}` : ""}
+        {t("welcome")}{user?.name ? `, ${user.name}` : ""}
       </Typography>
 
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", lg: "1fr 1fr 1fr" }, gap: 3, mb: 3 }}>
-        <StatCard icon={<FitnessCenterIcon color="primary" fontSize="small" />} label="Today's Exercises" value={summary.total} loading={isLoading} />
-        <StatCard icon={<CheckCircleIcon color="success" fontSize="small" />} label="Completed" value={summary.completed} loading={isLoading} color="success.main" />
-        <StatCard icon={<WarningIcon color="warning" fontSize="small" />} label="Pending" value={summary.pending} loading={isLoading} color="warning.main" />
+        <StatCard icon={<FitnessCenterIcon color="primary" fontSize="small" />} label={t("todaysExercises")} value={summary.total} loading={isLoading} />
+        <StatCard icon={<CheckCircleIcon color="success" fontSize="small" />} label={t("Completed")} value={summary.completed} loading={isLoading} color="success.main" />
+        <StatCard icon={<WarningIcon color="warning" fontSize="small" />} label={t("Pending")} value={summary.pending} loading={isLoading} color="warning.main" />
       </Box>
 
       {/* {!isLoading && allToday.length > 0 && (
@@ -84,19 +86,19 @@ export default function Dashboard() {
       )} */}
 
       {isError && (
-        <Alert severity="error" sx={{ mb: 2 }}>Failed to load schedules.</Alert>
+        <Alert severity="error" sx={{ mb: 2 }}>{t("failedToLoadSchedules")}</Alert>
       )}
 
       {!isError && (
         <Paper variant="outlined" sx={{ p: 3, borderRadius: 2 }}>
           <Typography variant="h6" sx={{ mb: 2 }}>
-            Today's Scheduled Exercises
+            {t("todaysScheduledExercises")}
           </Typography>
 
           {isLoading && <LoadingState rows={3} height={48} />}
 
           {!isLoading && allToday.length === 0 && (
-            <EmptyState message="No exercises scheduled for today." />
+            <EmptyState message={t("noExercisesScheduledToday")} />
           )}
 
           {entries.map(([key, label]) => {
@@ -105,7 +107,7 @@ export default function Dashboard() {
               <Box key={key} sx={{ mb: 3 }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
                   <Typography variant="subtitle2" color="text.secondary">
-                    {label}
+                    {t(label)}
                   </Typography>
                   <Chip label={`${items.length}`} size="small" color={groupColors[key]} />
                 </Box>

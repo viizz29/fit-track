@@ -4,6 +4,7 @@ import { PROJECT_LOCATION } from 'src/config';
 import { join } from 'path';
 import { type Response } from 'express';
 import { Public } from 'src/common/decorators/public.decorator';
+import { MSG91 } from 'src/util/send-email';
 
 @Controller('')
 export class AppController {
@@ -11,7 +12,7 @@ export class AppController {
 
   @Public()
   @Get()
-  getHello(): string {
+  getHello() {
     return this.appService.getHello();
   }
 

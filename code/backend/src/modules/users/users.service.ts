@@ -62,6 +62,7 @@ export class UsersService {
         email: testEmail,
         passwordHash: hashedPassword,
         name: 'Test',
+        isEmailVerified: true,
       });
 
       console.log('✅ Test user created: ' + testEmail);

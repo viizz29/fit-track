@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Box, Typography, Chip, ToggleButtonGroup, ToggleButton } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import CircleIcon from "@mui/icons-material/Circle";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ViewDayIcon from "@mui/icons-material/ViewDay";
 import ViewWeekIcon from "@mui/icons-material/ViewWeek";
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import PageWrapper from "@/components/layouts/page-wrapper";
@@ -22,6 +23,13 @@ function getMonday(d: dayjs.Dayjs): dayjs.Dayjs {
   return d.add(diff, "day");
 }
 
+const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+function dayToIndex(date: dayjs.Dayjs): number {
+  const d = date.day();
+  return d === 0 ? 6 : d - 1;
+}
+
 function TimelineItem({
   schedule,
   showConnector,
@@ -31,6 +39,7 @@ function TimelineItem({
   showConnector: boolean;
   tz: string;
 }) {
+  const { t } = useTranslation();
   const time = new Date(schedule.startDatetime).toLocaleTimeString(undefined, {
     timeZone: tz,
     hour: "2-digit",
@@ -41,7 +50,7 @@ function TimelineItem({
     schedule.recurrenceType === "WEEKLY" && schedule.weekdays?.length
       ? ` \u00B7 ${schedule.weekdays.join(", ")}`
       : schedule.recurrenceType === "DAILY"
-        ? " \u00B7 Daily"
+        ? ` \u00B7 ${t("Daily")}`
         : "";
 
   return (
@@ -77,7 +86,7 @@ function TimelineItem({
             {time}
           </Typography>
           {isCompleted && (
-            <Chip label="Done" size="small" color="success" variant="outlined" sx={{ height: 20, fontSize: 11 }} />
+            <Chip label={t("done")} size="small" color="success" variant="outlined" sx={{ height: 20, fontSize: 11 }} />
           )}
         </Box>
         <Typography variant="body1" fontWeight={600}>
@@ -113,10 +122,12 @@ function TimelineList({ items, tz }: { items: ExerciseSchedule[]; tz: string }) 
 }
 
 export default function Calendar() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const tz = user?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
   const [viewMode, setViewMode] = useState<ViewMode>("day");
   const [selectedDate, setSelectedDate] = useState<dayjs.Dayjs>(dayjs());
+  const [selectedDayIndex, setSelectedDayIndex] = useState<number>(() => dayToIndex(selectedDate));
 
   const dateStr = selectedDate.format("YYYY-MM-DD");
   const monday = getMonday(selectedDate).format("YYYY-MM-DD");
@@ -133,6 +144,10 @@ export default function Calendar() {
     enabled: viewMode === "week",
   });
 
+  useEffect(() => {
+    setSelectedDayIndex(dayToIndex(selectedDate));
+  }, [selectedDate]);
+
   const isLoading = viewMode === "day" ? dayQuery.isLoading : weekQuery.isLoading;
 
   return (
@@ -142,7 +157,9 @@ export default function Calendar() {
           <Typography variant="h6">
             {viewMode === "day"
               ? selectedDate.format("dddd, MMMM D, YYYY")
-              : `${dayjs(monday).format("MMM D")} \u2013 ${dayjs(monday).add(6, "day").format("MMM D, YYYY")}`}
+              : weekQuery.data
+                ? dayjs(weekQuery.data.days[selectedDayIndex]?.date).format("dddd, MMMM D, YYYY")
+                : `${dayjs(monday).format("MMM D")} \u2013 ${dayjs(monday).add(6, "day").format("MMM D, YYYY")}`}
           </Typography>
           <ToggleButtonGroup
             value={viewMode}
@@ -150,14 +167,14 @@ export default function Calendar() {
             onChange={(_, val: ViewMode | null) => val && setViewMode(val)}
             size="small"
           >
-            <ToggleButton value="day"><ViewDayIcon sx={{ mr: 0.5 }} /> Day</ToggleButton>
-            <ToggleButton value="week"><ViewWeekIcon sx={{ mr: 0.5 }} /> Week</ToggleButton>
+            <ToggleButton value="day"><ViewDayIcon sx={{ mr: 0.5 }} /> {t("day")}</ToggleButton>
+            <ToggleButton value="week"><ViewWeekIcon sx={{ mr: 0.5 }} /> {t("week")}</ToggleButton>
           </ToggleButtonGroup>
         </Box>
 
         <Box sx={{ mb: 3 }}>
           <DatePicker
-            label="Select date"
+            label={t("selectDate")}
             value={selectedDate}
             onChange={(v) => v && setSelectedDate(v)}
             format="YYYY-MM-DD"
@@ -170,7 +187,7 @@ export default function Calendar() {
         {!isLoading && viewMode === "day" && (
           <>
             {(!dayQuery.data || dayQuery.data.length === 0) ? (
-              <EmptyState message="No exercises scheduled for today." />
+              <EmptyState message={t("noExercisesScheduledToday")} />
             ) : (
               <TimelineList items={dayQuery.data} tz={tz} />
             )}
@@ -180,33 +197,37 @@ export default function Calendar() {
         {!isLoading && viewMode === "week" && weekQuery.data && (
           <>
             {weekQuery.data.days.every((d) => d.exercises.length === 0) ? (
-              <EmptyState message="No exercises scheduled for this week." />
+              <EmptyState message={t("noExercisesScheduledThisWeek")} />
             ) : (
-              weekQuery.data.days.map((d) => {
-                if (d.exercises.length === 0) return null;
-                const isToday = d.date === dayjs().format("YYYY-MM-DD");
-                return (
-                  <Box key={d.date} sx={{ mb: 3 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-                      <Box
-                        sx={{
-                          width: 8,
-                          height: 8,
-                          borderRadius: "50%",
-                          bgcolor: isToday ? "primary.main" : "grey.400",
-                        }}
-                      />
-                      <Typography variant="subtitle2" fontWeight={600}>
-                        {d.dayOfWeek}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {dayjs(d.date).format("MMM D")}
-                      </Typography>
-                    </Box>
-                    <TimelineList items={d.exercises} tz={tz} />
-                  </Box>
-                );
-              })
+              <>
+                <Box sx={{ display: "flex", gap: 1, mb: 3, flexWrap: "wrap" }}>
+                  {weekQuery.data.days.map((d, idx) => (
+                    <Chip
+                      key={d.date}
+                      label={
+                        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", lineHeight: 1.2 }}>
+                          <Typography variant="caption" sx={{ fontSize: 10 }}>{DAY_LABELS[idx]}</Typography>
+                          <Typography variant="caption" fontWeight={700} sx={{ fontSize: 13 }}>
+                            {dayjs(d.date).format("D")}
+                          </Typography>
+                        </Box>
+                      }
+                      variant={selectedDayIndex === idx ? "filled" : "outlined"}
+                      color={selectedDayIndex === idx ? "primary" : "default"}
+                      onClick={() => setSelectedDayIndex(idx)}
+                      sx={{ height: "auto", py: 0.5, px: 1, minWidth: 48 }}
+                    />
+                  ))}
+                </Box>
+
+                {(() => {
+                  const dayData = weekQuery.data!.days[selectedDayIndex];
+                  if (!dayData || dayData.exercises.length === 0) {
+                    return <EmptyState message={t("noExercisesScheduledThisDay")} />;
+                  }
+                  return <TimelineList items={dayData.exercises} tz={tz} />;
+                })()}
+              </>
             )}
           </>
         )}

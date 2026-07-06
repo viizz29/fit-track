@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Alert, IconButton } from "@mui/material";
+import { useTranslation } from "react-i18next";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
@@ -22,6 +23,7 @@ function snippet(text: string | undefined, max = 60): string {
 }
 
 export default function Exercises() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
@@ -36,19 +38,19 @@ export default function Exercises() {
     mutationFn: deleteExerciseApi,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["exercises"] });
-      toast.info("Exercise deleted");
+      toast.info(t("exerciseDeleted"));
     },
-    onError: () => toast.error("Failed to delete exercise"),
+    onError: () => toast.error(t("failedToDeleteExercise")),
     onSettled: () => setDeleteTarget(null),
   });
 
   const columns: Column<Exercise>[] = [
-    { key: "name", label: "Name", sortable: true },
-    { key: "description", label: "Description", sortable: true, render: (row) => snippet(row.description) },
-    { key: "createdAt", label: "Created", sortable: true, hideOnMobile: true, render: (row) => row.createdAt ? formatDate(new Date(row.createdAt)) : "—" },
-    { key: "updatedAt", label: "Updated", sortable: true, hideOnMobile: true, render: (row) => row.updatedAt ? formatDate(new Date(row.updatedAt)) : "—" },
+    { key: "name", label: t("name"), sortable: true },
+    { key: "description", label: t("description"), sortable: true, render: (row) => snippet(row.description) },
+    { key: "createdAt", label: t("created"), sortable: true, hideOnMobile: true, render: (row) => row.createdAt ? formatDate(new Date(row.createdAt)) : "—" },
+    { key: "updatedAt", label: t("updated"), sortable: true, hideOnMobile: true, render: (row) => row.updatedAt ? formatDate(new Date(row.updatedAt)) : "—" },
     {
-      key: "actions", label: "Actions", align: "right", width: 100,
+      key: "actions", label: t("actions"), align: "right", width: 100,
       render: (row) => (
         <>
           <IconButton size="small" onClick={() => setEditTarget(row.id)}><EditIcon fontSize="small" /></IconButton>
@@ -62,13 +64,13 @@ export default function Exercises() {
     <PageWrapper>
       <PageHeader
         title=""
-        actionLabel="New Exercise"
+        actionLabel={t("newExercise")}
         actionIcon={<AddIcon />}
         onAction={() => setCreateOpen(true)}
       />
 
       {isError && (
-        <Alert severity="error" sx={{ mb: 2 }}>Failed to load exercises.</Alert>
+        <Alert severity="error" sx={{ mb: 2 }}>{t("failedToLoadExercises")}</Alert>
       )}
 
       {!isError && (
@@ -77,7 +79,7 @@ export default function Exercises() {
           data={exercises ?? []}
           getRowKey={(row) => row.id}
           loading={isLoading}
-          emptyMessage="No exercises yet. Create your first exercise."
+          emptyMessage={t("noExercisesYet")}
         />
       )}
 
@@ -87,7 +89,7 @@ export default function Exercises() {
 
       <ConfirmDeleteDialog
         open={!!deleteTarget}
-        title="Delete Exercise"
+        title={t("deleteExercise")}
         isPending={deleteMutation.isPending}
         onConfirm={() => { if (deleteTarget) deleteMutation.mutate(deleteTarget); }}
         onCancel={() => setDeleteTarget(null)}

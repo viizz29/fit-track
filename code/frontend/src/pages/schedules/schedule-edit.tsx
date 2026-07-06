@@ -2,6 +2,7 @@ import { Typography, Button, Box, TextField, MenuItem, Alert, Checkbox, ListItem
 import { Formik } from "formik";
 import * as Yup from "yup";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import PageWrapper from "@/components/layouts/page-wrapper";
@@ -26,6 +27,7 @@ function toTimeInput(iso: string, tz: string): string {
 }
 
 export default function ScheduleEdit() {
+  const { t } = useTranslation();
   const { scheduleId } = useParams<{ scheduleId: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -54,10 +56,10 @@ export default function ScheduleEdit() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["schedules"] });
       queryClient.invalidateQueries({ queryKey: ["schedule", scheduleId] });
-      toast.info("Schedule updated");
+      toast.info(t("scheduleUpdated"));
       navigate("/schedules");
     },
-    onError: () => toast.error("Failed to update schedule"),
+    onError: () => toast.error(t("failedToUpdateSchedule")),
   });
 
   if (isLoading) {
@@ -67,17 +69,17 @@ export default function ScheduleEdit() {
   if (isError || !schedule) {
     return (
       <PageWrapper>
-        <Alert severity="error">Schedule not found.</Alert>
-        <Button sx={{ mt: 2 }} variant="outlined" onClick={() => navigate("/schedules")}>Back</Button>
+        <Alert severity="error">{t("scheduleNotFound")}</Alert>
+        <Button sx={{ mt: 2 }} variant="outlined" onClick={() => navigate("/schedules")}>{t("back")}</Button>
       </PageWrapper>
     );
   }
 
   return (
     <PageWrapper>
-      <PageHeader title="Edit Schedule" onBack={() => navigate(-1)} />
+      <PageHeader title={t("editSchedule")} onBack={() => navigate(-1)} />
 
-      <FormCard title="Edit Schedule" maxWidth={480}>
+      <FormCard title={t("editSchedule")} maxWidth={480}>
         <Formik
           enableReinitialize
           initialValues={{
@@ -89,14 +91,14 @@ export default function ScheduleEdit() {
             weekdays: schedule.weekdays || [] as string[],
           }}
           validationSchema={Yup.object({
-            exerciseTypeId: Yup.string().required("Select an exercise"),
-            startDate: Yup.string().required("Required"),
-            startTime: Yup.string().required("Required"),
-            timezone: Yup.string().required("Required"),
+            exerciseTypeId: Yup.string().required(t("selectExercise")),
+            startDate: Yup.string().required(t("required")),
+            startTime: Yup.string().required(t("required")),
+            timezone: Yup.string().required(t("required")),
             recurrenceType: Yup.string(),
             weekdays: Yup.array().when("recurrenceType", {
               is: "WEEKLY",
-              then: (s) => s.min(1, "Select at least one day").required("Required"),
+              then: (s) => s.min(1, t("selectAtLeastOneDay")).required(t("required")),
               otherwise: (s) => s.notRequired(),
             }),
           })}
@@ -115,7 +117,7 @@ export default function ScheduleEdit() {
             return (
               <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 <TextField
-                  fullWidth select label="Exercise" name="exerciseTypeId"
+                  fullWidth select label={t("exercise")} name="exerciseTypeId"
                   value={values.exerciseTypeId} onChange={handleChange}
                   error={touched.exerciseTypeId && !!errors.exerciseTypeId} helperText={touched.exerciseTypeId && errors.exerciseTypeId}
                 >
@@ -136,21 +138,21 @@ export default function ScheduleEdit() {
                   timezoneError={touched.timezone && typeof errors.timezone === "string" ? errors.timezone : undefined}
                 />
 
-                <Typography variant="subtitle2" sx={{ mt: 1 }}>Recurrence (optional)</Typography>
+                <Typography variant="subtitle2" sx={{ mt: 1 }}>{t("recurrenceOptional")}</Typography>
 
                 <Box sx={{ display: "flex", gap: 2 }}>
                   <TextField
-                    fullWidth select label="Type" name="recurrenceType"
+                    fullWidth select label={t("type")} name="recurrenceType"
                     value={values.recurrenceType} onChange={handleChange}
                   >
-                    <MenuItem value="">None</MenuItem>
+                    <MenuItem value="">{t("none")}</MenuItem>
                     {RECURRENCE_TYPES.map((r) => (
                       <MenuItem key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</MenuItem>
                     ))}
                   </TextField>
                   {showWeekdays && (
                     <TextField
-                      fullWidth select label="Days" name="weekdays"
+                      fullWidth select label={t("days")} name="weekdays"
                       value={values.weekdays} onChange={handleChange}
                       error={touched.weekdays && !!errors.weekdays}
                       helperText={touched.weekdays && errors.weekdays}
@@ -168,9 +170,9 @@ export default function ScheduleEdit() {
 
                 <Box sx={{ display: "flex", gap: 2, mt: 1 }}>
                   <Button type="submit" variant="contained" disabled={mutation.isPending}>
-                    {mutation.isPending ? "Saving..." : "Save"}
+                    {mutation.isPending ? t("saving") : t("save")}
                   </Button>
-                  <Button variant="outlined" onClick={() => navigate("/schedules")}>Cancel</Button>
+                  <Button variant="outlined" onClick={() => navigate("/schedules")}>{t("cancel")}</Button>
                 </Box>
               </Box>
             );

@@ -1,6 +1,7 @@
 import { Button, Box, TextField, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import { Formik } from "formik";
 import * as Yup from "yup";
+import { useTranslation } from "react-i18next";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { createExerciseApi } from "@/api/exercises-api";
@@ -11,31 +12,32 @@ type CreateExerciseDialogProps = {
 };
 
 export default function CreateExerciseDialog({ open, onClose }: CreateExerciseDialogProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
     mutationFn: createExerciseApi,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["exercises"] });
-      toast.info("Exercise created");
+      toast.info(t("exerciseCreated"));
       onClose();
     },
     onError: (err) => {
       if ((err as any)?.response?.status === 409) {
-        toast.info("Exercise already exists");
+        toast.info(t("exerciseAlreadyExists"));
       } else {
-        toast.error("Failed to create exercise");
+        toast.error(t("failedToCreateExercise"));
       }
     },
   });
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>New Exercise</DialogTitle>
+      <DialogTitle>{t("newExercise")}</DialogTitle>
       <Formik
         initialValues={{ name: "", description: "" }}
         validationSchema={Yup.object({
-          name: Yup.string().required("Required"),
+          name: Yup.string().required(t("required")),
           description: Yup.string(),
         })}
         onSubmit={(values) => mutation.mutate(values)}
@@ -45,12 +47,12 @@ export default function CreateExerciseDialog({ open, onClose }: CreateExerciseDi
             <DialogContent>
               <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 <TextField
-                  fullWidth label="Exercise Name" name="name"
+                  fullWidth label={t("exerciseName")} name="name"
                   value={values.name} onChange={handleChange}
                   error={touched.name && !!errors.name} helperText={touched.name && errors.name}
                 />
                 <TextField
-                  fullWidth label="Description" name="description"
+                  fullWidth label={t("description")} name="description"
                   value={values.description} onChange={handleChange}
                   error={touched.description && !!errors.description} helperText={touched.description && errors.description}
                   multiline rows={3}
@@ -58,9 +60,9 @@ export default function CreateExerciseDialog({ open, onClose }: CreateExerciseDi
               </Box>
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => { resetForm(); onClose(); }}>Cancel</Button>
+              <Button onClick={() => { resetForm(); onClose(); }}>{t("cancel")}</Button>
               <Button type="submit" variant="contained" disabled={mutation.isPending}>
-                {mutation.isPending ? "Creating..." : "Create"}
+                {mutation.isPending ? t("creating") : t("create")}
               </Button>
             </DialogActions>
           </Box>

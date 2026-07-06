@@ -11,6 +11,7 @@ module.exports = {
         email: `user${i + 1}@example.com`,
         password_hash:
           '$2b$10$KiAcpDEwGrA9eZoqouDRz.do8oWxu7brPs.Py7WbQl9cX/CDTtWD6', // password123
+        is_email_verified: true,
         created_at: now,
         updated_at: now,
       }));

@@ -1,6 +1,7 @@
 import { Box, Paper, Typography, Button, CircularProgress, Chip } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/context/use-auth";
 import type { ExerciseSchedule } from "@/api/schedules-api";
 
@@ -25,6 +26,7 @@ export function ScheduleCard({
   onComplete: () => void;
   isCompleting: boolean;
 }) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const tz = user?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -41,7 +43,7 @@ export function ScheduleCard({
         </Typography>
       </Box>
       {schedule.completed ? (
-        <Chip icon={<TaskAltIcon />} label="Completed" color="success" size="small" variant="filled" />
+        <Chip icon={<TaskAltIcon />} label={t("Completed")} color="success" size="small" variant="filled" />
       ) : (
         <Button
           variant="contained"
@@ -51,7 +53,7 @@ export function ScheduleCard({
           onClick={onComplete}
           disabled={isCompleting}
         >
-          {isCompleting ? "Completing..." : "Complete"}
+          {isCompleting ? t("completing") : t("complete")}
         </Button>
       )}
     </Paper>

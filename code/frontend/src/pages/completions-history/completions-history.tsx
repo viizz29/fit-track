@@ -4,6 +4,7 @@ import {
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import PageWrapper from "@/components/layouts/page-wrapper";
@@ -16,6 +17,7 @@ import type { Column } from "@/components/data-display/data-table";
 import type { Dayjs } from "dayjs";
 
 export default function CompletionsHistory() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [dateFrom, setDateFrom] = useState<Dayjs | null>(null);
   const [dateTo, setDateTo] = useState<Dayjs | null>(null);
@@ -45,9 +47,9 @@ export default function CompletionsHistory() {
     mutationFn: deleteCompletionApi,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["completions"] });
-      toast.info("Completion record deleted");
+      toast.info(t("completionRecordDeleted"));
     },
-    onError: () => toast.error("Failed to delete completion record"),
+    onError: () => toast.error(t("failedToDeleteCompletionRecord")),
     onSettled: () => setDeleteTarget(null),
   });
 
@@ -60,11 +62,11 @@ export default function CompletionsHistory() {
 
 
   const columns: Column<CompletionRecord>[] = [
-    { key: "_exerciseName", label: "Exercise", sortable: true, render: (row) => row.schedule['exerciseType.name'] },
-    { key: "_scheduleTitle", label: "Schedule", hideOnMobile: true, sortable: true, render: (row) => row.schedule.recurrenceType },
-    { key: "completionDateTime", label: "Completed At", sortable: true, render: (row) => new Date(row.completionDatetime).toLocaleString() },
+    { key: "_exerciseName", label: t("exercise"), sortable: true, render: (row) => row["schedule.exerciseType.name"] },
+    { key: "_scheduleTitle", label: t("schedule"), hideOnMobile: true, sortable: true, render: (row) => row["schedule.recurrenceType"] },
+    { key: "completionDateTime", label: t("completedAt"), sortable: true, render: (row) => new Date(row.completionDatetime).toLocaleString() },
     {
-      key: "actions", label: "Actions", align: "right", width: 70,
+      key: "actions", label: t("actions"), align: "right", width: 70,
       render: (row) => (
         <IconButton size="small" color="error" onClick={() => setDeleteTarget(row.id)}><DeleteIcon fontSize="small" /></IconButton>
       ),
@@ -78,31 +80,31 @@ export default function CompletionsHistory() {
       <Paper variant="outlined" sx={{ p: 2, mb: 3, borderRadius: 2 }}>
         <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", alignItems: "center" }}>
           <DatePicker
-            label="From"
+            label={t("from")}
             value={dateFrom}
             onChange={(v) => setDateFrom(v)}
             format="YYYY-MM-DD"
             slotProps={{ textField: { size: "small", sx: { width: 160 } } }}
           />
           <DatePicker
-            label="To"
+            label={t("to")}
             value={dateTo}
             onChange={(v) => setDateTo(v)}
             format="YYYY-MM-DD"
             slotProps={{ textField: { size: "small", sx: { width: 160 } } }}
           />
-          <TextField select label="Schedule" size="small" value={scheduleId} onChange={(e) => setScheduleId(e.target.value)} sx={{ minWidth: 180 }}>
-            <MenuItem value="">All</MenuItem>
+          <TextField select label={t("schedule")} size="small" value={scheduleId} onChange={(e) => setScheduleId(e.target.value)} sx={{ minWidth: 180 }}>
+            <MenuItem value="">{t("all")}</MenuItem>
             {schedules?.map((s) => (
               <MenuItem key={s.id} value={s.id}>{s.title}</MenuItem>
             ))}
           </TextField>
-          <Button variant="outlined" onClick={handleClear}>Clear</Button>
+          <Button variant="outlined" onClick={handleClear}>{t("clear")}</Button>
         </Box>
       </Paper>
 
       {isError && (
-        <Alert severity="error" sx={{ mb: 2 }}>Failed to load completions.</Alert>
+        <Alert severity="error" sx={{ mb: 2 }}>{t("failedToLoadCompletions")}</Alert>
       )}
 
       {!isError && completions && (
@@ -111,15 +113,15 @@ export default function CompletionsHistory() {
           data={completions}
           getRowKey={(row) => row.id}
           loading={isLoading}
-          emptyMessage="No completions match the selected filters."
+          emptyMessage={t("noCompletionsMatch")}
           searchable
-          searchPlaceholder="Search by exercise or schedule..."
+          searchPlaceholder={t("searchByExerciseOrSchedule")}
         />
       )}
 
       <ConfirmDeleteDialog
         open={!!deleteTarget}
-        title="Delete Completion Record"
+        title={t("deleteCompletionRecord")}
         isPending={deleteMutation.isPending}
         onConfirm={() => { if (deleteTarget) deleteMutation.mutate(deleteTarget); }}
         onCancel={() => setDeleteTarget(null)}

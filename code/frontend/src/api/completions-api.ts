@@ -1,14 +1,13 @@
 import api from "./client";
-import type { ExerciseSchedule } from "./schedules-api";
 
 export type CompletionRecord = {
   id: string;
   scheduleId: string;
-  exerciseName?: string;
   scheduleTitle?: string;
   completionDatetime: string;
   createdAt?: string;
-  schedule: ExerciseSchedule;
+  "schedule.exerciseType.name": string;
+  "schedule.recurrenceType": string;
 };
 
 export const deleteCompletionApi = async (id: string): Promise<void> => {

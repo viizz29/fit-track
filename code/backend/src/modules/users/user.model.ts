@@ -38,4 +38,23 @@ export class User extends Model {
     defaultValue: 'user',
   })
   role!: string;
+
+  @Column({
+    type: DataType.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  })
+  isEmailVerified!: boolean;
+
+  @Column({
+    type: DataType.STRING(255),
+    allowNull: true,
+  })
+  emailVerificationToken!: string | null;
+
+  @Column({
+    type: DataType.DATE,
+    allowNull: true,
+  })
+  emailVerificationTokenExpiresAt!: Date | null;
 }
