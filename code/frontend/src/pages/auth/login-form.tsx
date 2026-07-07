@@ -24,10 +24,7 @@ export default function LoginForm() {
       navigate("/");
     },
 
-    onError: () => {
-      console.error("Login failed");
-      alert("Invalid credentials");
-    },
+    onError: () => {},
   });
 
   return (
@@ -46,7 +43,7 @@ export default function LoginForm() {
 
         {mutation.isError && (
           <Alert severity="error" sx={{ mb: 2 }}>
-            Login failed
+            {(mutation.error as any)?.response?.data?.message || "Invalid credentials"}
           </Alert>
         )}
 

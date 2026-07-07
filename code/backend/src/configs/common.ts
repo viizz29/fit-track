@@ -131,6 +131,11 @@ export const FRONTEND_DEPLOYMENT_LOCATION = process.env
   ? process.env.FRONTEND_DEPLOYMENT_LOCATION
   : '/var/www/magic-web';
 
+export const PASSWORD_RESET_TOKEN_EXPIRY_HOURS = process.env
+  .PASSWORD_RESET_TOKEN_EXPIRY_HOURS
+  ? Number(process.env.PASSWORD_RESET_TOKEN_EXPIRY_HOURS)
+  : 1;
+
 export const VERIFICATION_TOKEN_EXPIRY_HOURS = process.env
   .VERIFICATION_TOKEN_EXPIRY_HOURS
   ? Number(process.env.VERIFICATION_TOKEN_EXPIRY_HOURS)

@@ -1,29 +1,28 @@
-import { useMemo } from "react";
-import { TextField, Button, Typography, Paper, Box, Alert, MenuItem } from "@mui/material";
+import { useState } from "react";
+import { TextField, Button, Typography, Paper, Box, Alert, IconButton, InputAdornment } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { Formik } from "formik";
 import * as Yup from "yup";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { registerApi } from "../../api/auth-api";
-import { getTimezones } from "@/utils/timezones";
-
-const DEFAULT_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 export default function RegisterForm() {
-  const navigate = useNavigate();
-  const timezones = useMemo(() => getTimezones(), []);
+  const [showPassword, setShowPassword] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const mutation = useMutation({
-    mutationFn: ({ email, password, timezone }: { email: string; password: string; timezone: string }) =>
-      registerApi(email, password, timezone),
+    mutationFn: ({ name, email, password }: { name: string; email: string; password: string }) =>
+      registerApi(name, email, password),
 
-    onSuccess: () => {
-      navigate("/login");
+    onSuccess: (response) => {
+      if (response.status === 201) {
+        setSuccessMessage(response.data.message);
+      }
     },
 
     onError: () => {
       console.error("Registration failed");
-      alert("Registration failed");
     },
   });
 
@@ -43,79 +42,96 @@ export default function RegisterForm() {
 
         {mutation.isError && (
           <Alert severity="error" sx={{ mb: 2 }}>
-            Registration failed
+            {(mutation.error as any)?.response?.status === 409
+              ? "An account with this email already exists"
+              : "Registration failed"}
           </Alert>
         )}
 
-        <Formik
-          initialValues={{ email: "", password: "", timezone: DEFAULT_TIMEZONE }}
-          validationSchema={Yup.object({
-            email: Yup.string().email("Invalid email").required("Required"),
-            password: Yup.string().min(6, "At least 6 characters").required("Required"),
-            timezone: Yup.string().required("Required"),
-          })}
-          onSubmit={(values, { setSubmitting }) => {
-            mutation.mutate({ email: values.email, password: values.password, timezone: values.timezone });
-            setSubmitting(false);
-          }}
-        >
-          {({
-            handleSubmit,
-            handleChange,
-            values,
-            errors,
-            touched,
-          }) => (
-            <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <TextField
-                fullWidth
-                label="Email"
-                name="email"
-                value={values.email}
-                onChange={handleChange}
-                error={touched.email && !!errors.email}
-                helperText={touched.email && errors.email}
-              />
+        {successMessage ? (
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, alignItems: "center" }}>
+            <Alert severity="success" sx={{ width: "100%" }}>
+              {successMessage}
+            </Alert>
+            <Button component={Link} to="/login" fullWidth variant="contained">
+              Go to Login
+            </Button>
+          </Box>
+        ) : (
+          <Formik
+            initialValues={{ name: "", email: "", password: "" }}
+            validationSchema={Yup.object({
+              name: Yup.string().required("Required"),
+              email: Yup.string().email("Invalid email").required("Required"),
+              password: Yup.string().min(6, "At least 6 characters").required("Required"),
+            })}
+            onSubmit={(values, { setSubmitting }) => {
+              mutation.mutate({ name: values.name, email: values.email, password: values.password });
+              setSubmitting(false);
+            }}
+          >
+            {({
+              handleSubmit,
+              handleChange,
+              values,
+              errors,
+              touched,
+            }) => (
+              <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <TextField
+                  fullWidth
+                  label="Name"
+                  name="name"
+                  value={values.name}
+                  onChange={handleChange}
+                  error={touched.name && !!errors.name}
+                  helperText={touched.name && errors.name}
+                />
 
-              <TextField
-                fullWidth
-                label="Password"
-                type="password"
-                name="password"
-                autoComplete="new-password"
-                value={values.password}
-                onChange={handleChange}
-                error={touched.password && !!errors.password}
-                helperText={touched.password && errors.password}
-              />
+                <TextField
+                  fullWidth
+                  label="Email"
+                  name="email"
+                  value={values.email}
+                  onChange={handleChange}
+                  error={touched.email && !!errors.email}
+                  helperText={touched.email && errors.email}
+                />
 
-              <TextField
-                fullWidth
-                select
-                label="Timezone"
-                name="timezone"
-                value={values.timezone}
-                onChange={handleChange}
-                error={touched.timezone && !!errors.timezone}
-                helperText={touched.timezone && errors.timezone}
-              >
-                {timezones.map((tz) => (
-                  <MenuItem key={tz} value={tz}>
-                    {tz}
-                  </MenuItem>
-                ))}
-              </TextField>
+                <TextField
+                  fullWidth
+                  label="Password"
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  autoComplete="new-password"
+                  value={values.password}
+                  onChange={handleChange}
+                  error={touched.password && !!errors.password}
+                  helperText={touched.password && errors.password}
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                />
 
-              <Button type="submit" fullWidth variant="contained">
-                Register
-              </Button>
+                <Button type="submit" fullWidth variant="contained">
+                  Register
+                </Button>
 
-              <Typography variant="body2" sx={{ textAlign: "center", mt: 1 }}>
-                Already have an account? <Link to="/login">Login</Link>
-              </Typography>
-            </Box>
-          )}
-        </Formik>
+                <Typography variant="body2" sx={{ textAlign: "center", mt: 1 }}>
+                  Already have an account? <Link to="/login">Login</Link>
+                </Typography>
+              </Box>
+            )}
+          </Formik>
+        )}
       </Paper>
     </Box>
   );

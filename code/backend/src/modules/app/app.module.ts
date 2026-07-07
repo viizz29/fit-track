@@ -17,6 +17,7 @@ import { ExerciseCompletionsModule } from '../exercise-completions/exercise-comp
 import { ReportsModule } from '../reports/reports.module';
 import { ExerciseStatsModule } from '../exercise-stats/exercise-stats.module';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { EmailVerifiedGuard } from '../../common/guards/email-verified.guard';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { ChatModule } from '../chat/chat.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
@@ -62,6 +63,10 @@ if (SOCKETIO_ENDPOINT_ON) {
 @Module({
   imports,
   controllers: [AppController],
-  providers: [AppService, { provide: APP_GUARD, useClass: JwtAuthGuard }],
+  providers: [
+    AppService,
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: EmailVerifiedGuard },
+  ],
 })
 export class AppModule {}

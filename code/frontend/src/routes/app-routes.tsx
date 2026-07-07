@@ -20,6 +20,7 @@ const Login = lazy(() => import("../pages/auth/login"));
 const Register = lazy(() => import("../pages/auth/register"));
 const ForgotPassword = lazy(() => import("../pages/auth/forgot-password"));
 const ResetPassword = lazy(() => import("../pages/auth/reset-password"));
+const VerifyEmail = lazy(() => import("../pages/auth/verify-email"));
 const NotFound = lazy(() => import("../pages/misc/not-found"));
 
 const LoadingFallback = () => (
@@ -58,6 +59,7 @@ export default function AppRoutes() {
         <Route path="/register" element={<AuthRoute><Register /></AuthRoute>} />
         <Route path="/forgot-password" element={<AuthRoute><ForgotPassword /></AuthRoute>} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
 
         <Route element={<PrivateRoute><MainLayout /></PrivateRoute>}>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />

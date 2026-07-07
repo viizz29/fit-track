@@ -12,10 +12,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  validate(payload: { sub: string; email: string }) {
+  validate(payload: { sub: string; email: string; isEmailVerified: boolean }) {
     return {
       userId: payload.sub,
       email: payload.email,
+      isEmailVerified: payload.isEmailVerified,
     };
   }
 }

@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { SequelizeModule } from '@nestjs/sequelize';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JWT_SECRET } from '../../config';
@@ -6,11 +7,14 @@ import { JwtModule } from '@nestjs/jwt';
 import { UsersModule } from '../users/users.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from 'src/lib/jwt-strategy';
+import { PasswordResetToken } from './password-reset-token.model';
+import { PasswordResetTokenRepository } from './password-reset-token.repository';
 
 @Module({
   imports: [
     UsersModule,
     PassportModule,
+    SequelizeModule.forFeature([PasswordResetToken]),
     // JWT Setup
     JwtModule.registerAsync({
       useFactory: () => ({
@@ -21,7 +25,7 @@ import { JwtStrategy } from 'src/lib/jwt-strategy';
       }),
     }),
   ],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, PasswordResetTokenRepository],
   controllers: [AuthController],
 })
 export class AuthModule {}

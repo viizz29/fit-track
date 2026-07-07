@@ -1,6 +1,7 @@
 import { Controller, Get, Patch, Body } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { SkipEmailVerification } from '../../common/decorators/public.decorator';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
@@ -15,11 +16,13 @@ export class UsersController {
   //   return this.usersService.findAll();
   // }
 
+  @SkipEmailVerification()
   @Get('me')
   getProfile(@CurrentUser() user: { userId: string }) {
     return this.usersService.findById(user.userId);
   }
 
+  @SkipEmailVerification()
   @Patch('me')
   @ApiOperation({ summary: 'Update profile (name and/or email)' })
   updateProfile(

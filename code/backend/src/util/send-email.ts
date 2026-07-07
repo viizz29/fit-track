@@ -72,6 +72,21 @@ export class MSG91 {
     ]);
   }
 
+  public static async sendPasswordResetEmail(
+    name: string,
+    email: string,
+    token: string,
+  ) {
+    const templateId = 'email_verification_59';
+    const company_name = 'Fitrack';
+    const reset_link = `${PUBLIC_HOST_WITH_PORT}/reset-password?token=${token}`;
+    await sendEmailThroughMsg91(
+      templateId,
+      { verification_link: reset_link, company_name, name },
+      [{ name, email }],
+    );
+  }
+
   public static async sendVerificationEmail(
     name: string,
     email: string,

@@ -33,13 +33,20 @@ export class UserRepository {
     return this.userModel.findOne({ where: { email } });
   }
 
-  async findByVerificationToken(token: string): Promise<User | null> {
+  async findByVerificationToken(
+    token: string,
+    raw: boolean = true,
+  ): Promise<User | null> {
     return this.userModel.findOne({
       where: { emailVerificationToken: token },
+      raw,
     });
   }
 
-  async update(user_id: string, attrs: Partial<User>): Promise<[number, User[]]> {
+  async update(
+    user_id: string,
+    attrs: Partial<User>,
+  ): Promise<[number, User[]]> {
     return this.userModel.update(attrs, {
       where: { user_id },
       returning: true,

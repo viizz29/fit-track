@@ -47,15 +47,20 @@ export const loginApi = async (email: string, password: string) => {
 };
 
 export const registerApi = async (
+  name: string,
   email: string,
   password: string,
-  timezone: string,
 ) => {
   const response = await api.post("/api/v1/auth/register", {
+    name,
     email,
     password,
-    timezone,
   });
+  return response;
+};
+
+export const verifyEmailApi = async (token: string) => {
+  const response = await api.post("/api/v1/auth/verify-email", { token });
   return response.data;
 };
 
