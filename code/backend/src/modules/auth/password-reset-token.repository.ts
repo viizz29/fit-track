@@ -9,12 +9,17 @@ export class PasswordResetTokenRepository {
     private model: typeof PasswordResetToken,
   ) {}
 
-  async create(values: Partial<PasswordResetToken>): Promise<PasswordResetToken> {
+  async create(
+    values: Partial<PasswordResetToken>,
+  ): Promise<PasswordResetToken> {
     return this.model.create(values as any);
   }
 
-  async findByToken(token: string): Promise<PasswordResetToken | null> {
-    return this.model.findOne({ where: { token } });
+  async findByToken(
+    token: string,
+    raw: boolean = true,
+  ): Promise<PasswordResetToken | null> {
+    return this.model.findOne({ where: { token }, raw });
   }
 
   async markUsed(id: string): Promise<void> {

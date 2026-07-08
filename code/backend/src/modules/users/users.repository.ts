@@ -29,8 +29,8 @@ export class UserRepository {
     return this.userModel.findByPk(user_id);
   }
 
-  async findByEmail(email: string): Promise<User | null> {
-    return this.userModel.findOne({ where: { email } });
+  async findByEmail(email: string, raw: boolean = true): Promise<User | null> {
+    return this.userModel.findOne({ where: { email }, raw });
   }
 
   async findByVerificationToken(

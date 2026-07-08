@@ -65,12 +65,12 @@ export const verifyEmailApi = async (token: string) => {
 };
 
 export const forgotPasswordApi = async (email: string) => {
-  const response = await api.post("/v1/auth/forgot-password", { email });
+  const response = await api.post("/api/v1/auth/forgot-password", { email });
   return response.data;
 };
 
 export const resetPasswordApi = async (token: string, password: string) => {
-  const response = await api.post("/v1/auth/reset-password", {
+  const response = await api.post("/api/v1/auth/reset-password", {
     token,
     password,
   });

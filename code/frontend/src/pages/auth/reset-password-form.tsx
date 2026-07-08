@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { TextField, Button, Typography, Paper, Box, Alert } from "@mui/material";
 import { Formik } from "formik";
 import * as Yup from "yup";
@@ -9,13 +10,14 @@ export default function ResetPasswordForm() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token") || "";
+  const [success, setSuccess] = useState(false);
 
   const mutation = useMutation({
     mutationFn: ({ password }: { password: string }) =>
       resetPasswordApi(token, password),
 
     onSuccess: () => {
-      navigate("/login");
+      setSuccess(true);
     },
 
     onError: () => {
@@ -23,6 +25,32 @@ export default function ResetPasswordForm() {
       alert("Failed to reset password");
     },
   });
+
+  if (success) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
+        }}
+      >
+        <Paper sx={{ p: 3, width: "100%", maxWidth: 448 }}>
+          <Alert severity="success" sx={{ mb: 2 }}>
+            Your password has been successfully reset.
+          </Alert>
+          <Button
+            fullWidth
+            variant="contained"
+            onClick={() => navigate("/login")}
+          >
+            Go to Login
+          </Button>
+        </Paper>
+      </Box>
+    );
+  }
 
   if (!token) {
     return (

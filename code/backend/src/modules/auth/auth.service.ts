@@ -120,28 +120,28 @@ export class AuthService {
 
   async forgotPassword(email: string) {
     const user = await this.userRepository.findByEmail(email);
-    if (!user) {
-      throw new BadRequestException('No account found with this email');
-    }
+    if (user) {
+      await this.passwordResetTokenRepository.invalidatePreviousTokens(
+        user.userId,
+      );
 
-    await this.passwordResetTokenRepository.invalidatePreviousTokens(
-      user.userId,
-    );
+      const token = crypto.randomBytes(32).toString('hex');
+      const expiresAt = new Date();
+      expiresAt.setHours(
+        expiresAt.getHours() + PASSWORD_RESET_TOKEN_EXPIRY_HOURS,
+      );
 
-    const token = crypto.randomBytes(32).toString('hex');
-    const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + PASSWORD_RESET_TOKEN_EXPIRY_HOURS);
+      await this.passwordResetTokenRepository.create({
+        userId: user.userId,
+        token,
+        expiresAt,
+      });
 
-    await this.passwordResetTokenRepository.create({
-      userId: user.userId,
-      token,
-      expiresAt,
-    });
-
-    try {
-      await MSG91.sendPasswordResetEmail(user.name, user.email, token);
-    } catch (err) {
-      console.error('Failed to send password reset email:', err);
+      try {
+        await MSG91.sendPasswordResetEmail(user.name, user.email, token);
+      } catch (err) {
+        console.error('Failed to send password reset email:', err);
+      }
     }
 
     return {
@@ -151,9 +151,8 @@ export class AuthService {
   }
 
   async resetPassword(token: string, newPassword: string) {
-    const resetToken = await this.passwordResetTokenRepository.findByToken(
-      token,
-    );
+    const resetToken =
+      await this.passwordResetTokenRepository.findByToken(token);
     if (!resetToken) {
       throw new BadRequestException('Invalid or expired reset token');
     }
