@@ -6,6 +6,7 @@ import {
 import { UserRepository } from './users.repository';
 import { User } from './user.model';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { UpdateEmailPreferencesDto } from './dto/update-email-preferences.dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -42,6 +43,30 @@ export class UsersService {
 
     await this.userRepository.update(userId, dto);
     return this.findById(userId);
+  }
+
+  async getEmailPreferences(userId: string) {
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return { emailNotifications: user.isEmailNotificationsEnabled };
+  }
+
+  async updateEmailPreferences(
+    userId: string,
+    dto: UpdateEmailPreferencesDto,
+  ) {
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    await this.userRepository.update(userId, {
+      isEmailNotificationsEnabled: dto.emailNotifications,
+    } as Partial<User>);
+
+    return { emailNotifications: dto.emailNotifications };
   }
 
   // This runs automatically when the module starts

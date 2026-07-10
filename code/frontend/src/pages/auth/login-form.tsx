@@ -6,6 +6,7 @@ import { useAuth } from "../../context/use-auth";
 import { useNavigate, Link } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { loginApi, getProfileApi, verifyOtpLoginApi } from "../../api/auth-api";
+import FtrkLogo from "../../assets/ftrk-logo";
 
 export default function LoginForm() {
   const { login } = useAuth();
@@ -23,6 +24,7 @@ export default function LoginForm() {
         setStep("otp");
         return;
       }
+      localStorage.setItem("token", JSON.stringify(data.token));
       try {
         const profile = await getProfileApi();
         login(data.token, profile);
@@ -38,6 +40,7 @@ export default function LoginForm() {
       verifyOtpLoginApi(tempToken!, otp),
 
     onSuccess: async (data) => {
+      localStorage.setItem("token", JSON.stringify(data.token));
       try {
         const profile = await getProfileApi();
         login(data.token, profile);
@@ -63,6 +66,9 @@ export default function LoginForm() {
       }}
     >
       <Paper sx={{ p: 3, width: "100%", maxWidth: 448 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+          <FtrkLogo width={140} height={48} />
+        </Box>
         <Typography variant="h5" sx={{ mb: 2 }}>
           {step === "otp" ? "Two-Factor Authentication" : "Login"}
         </Typography>

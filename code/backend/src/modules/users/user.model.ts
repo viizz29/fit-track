@@ -65,4 +65,12 @@ export class User extends Model {
     field: 'is_2fa_enabled',
   })
   is2faEnabled!: boolean;
+
+  @Column({
+    type: DataType.BOOLEAN,
+    allowNull: false,
+    defaultValue: true,
+    field: 'is_email_notifications_enabled',
+  })
+  isEmailNotificationsEnabled!: boolean;
 }
