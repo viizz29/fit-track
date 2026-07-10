@@ -11,6 +11,7 @@ export type UserProfile = {
   name?: string;
   role?: string;
   timezone?: string;
+  is2faEnabled?: boolean;
 };
 
 type User = UserProfile & {

@@ -27,7 +27,7 @@ import { useAuth } from "@/context/use-auth";
 import { getExercisesApi } from "@/api/exercises-api";
 import { getSchedulesApi } from "@/api/schedules-api";
 import { getCompletionsApi } from "@/api/completions-api";
-import { updateProfileApi, updateEmailPreferencesApi, getProfileApi, getEmailPreferencesApi } from "@/api/auth-api";
+import { updateProfileApi, updateEmailPreferencesApi, getProfileApi, getEmailPreferencesApi, toggle2faApi } from "@/api/auth-api";
 
 export default function ProfilePage() {
   const { t } = useTranslation();
@@ -78,6 +78,15 @@ export default function ProfilePage() {
       toast.error(t("failedToUpdateEmailPreferences"));
       setEmailNotifications((prev) => !prev);
     },
+  });
+
+  const toggle2faMutation = useMutation({
+    mutationFn: toggle2faApi,
+    onSuccess: (_, enabled) => {
+      updateProfile({ ...user, is2faEnabled: enabled } as any);
+      toast.info(`Two-factor authentication ${enabled ? "enabled" : "disabled"}`);
+    },
+    onError: () => toast.error("Failed to update two-factor authentication"),
   });
 
   const handleEmailToggle = (_: unknown, checked: boolean) => {
@@ -272,6 +281,27 @@ export default function ProfilePage() {
                 }
                 label={t("receiveEmailNotifications")}
               />
+            )}
+          </Paper>
+
+          <Paper variant="outlined" sx={{ borderRadius: 2, p: 3, mt: 3 }}>
+            <Typography variant="h6" sx={{ mb: 2 }}>Two-Factor Authentication</Typography>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={user?.is2faEnabled ?? false}
+                  onChange={(_, checked) => {
+                    toggle2faMutation.mutate(checked);
+                  }}
+                  disabled={toggle2faMutation.isPending}
+                />
+              }
+              label="Require OTP from email when logging in"
+            />
+            {toggle2faMutation.isError && (
+              <Alert severity="error" sx={{ mt: 1 }}>
+                {(toggle2faMutation.error as any)?.response?.data?.message || "Failed to update 2FA setting"}
+              </Alert>
             )}
           </Paper>
         </>

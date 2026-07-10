@@ -57,4 +57,12 @@ export class User extends Model {
     allowNull: true,
   })
   emailVerificationTokenExpiresAt!: Date | null;
+
+  @Column({
+    type: DataType.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+    field: 'is_2fa_enabled',
+  })
+  is2faEnabled!: boolean;
 }

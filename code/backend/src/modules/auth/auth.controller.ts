@@ -1,4 +1,10 @@
-import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { Controller, Get, Post, Body } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -7,7 +13,13 @@ import { VerifyEmailDto } from './dto/verify-email.dto';
 import { ResendVerificationDto } from './dto/resend-verification.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { Public } from 'src/common/decorators/public.decorator';
+import { VerifyOtpLoginDto } from './dto/verify-otp-login.dto';
+import { Toggle2faDto } from './dto/toggle-2fa.dto';
+import {
+  Public,
+  SkipEmailVerification,
+} from 'src/common/decorators/public.decorator';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 
 @ApiTags('auth')
 @Controller('v1/auth')
@@ -84,5 +96,28 @@ export class AuthController {
   login(@Body() body: LoginDto) {
     console.log({ body });
     return this.authService.login(body.email, body.password);
+  }
+
+  @Public()
+  @ApiOperation({ summary: 'Verify OTP for 2FA login step 2' })
+  @ApiBody({ type: VerifyOtpLoginDto })
+  @ApiResponse({ status: 200, description: 'Return JWT access token.' })
+  @ApiResponse({ status: 401, description: 'Invalid or expired OTP.' })
+  @Post('verify-otp-login')
+  verifyOtpLogin(@Body() dto: VerifyOtpLoginDto) {
+    return this.authService.verifyOtpLogin(dto.tempToken, dto.otp);
+  }
+
+  @SkipEmailVerification()
+  @ApiBearerAuth('bearerAuth')
+  @ApiOperation({ summary: 'Enable or disable two-factor authentication' })
+  @ApiBody({ type: Toggle2faDto })
+  @ApiResponse({ status: 200, description: '2FA setting updated.' })
+  @Post('toggle-2fa')
+  toggle2fa(
+    @Body() dto: Toggle2faDto,
+    @CurrentUser() user: { userId: string },
+  ) {
+    return this.authService.toggle2fa(user.userId, dto.enabled);
   }
 }

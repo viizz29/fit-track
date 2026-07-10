@@ -131,6 +131,10 @@ export const FRONTEND_DEPLOYMENT_LOCATION = process.env
   ? process.env.FRONTEND_DEPLOYMENT_LOCATION
   : '/var/www/magic-web';
 
+export const OTP_EXPIRY_MINUTES = process.env.OTP_EXPIRY_MINUTES
+  ? Number(process.env.OTP_EXPIRY_MINUTES)
+  : 10;
+
 export const PASSWORD_RESET_TOKEN_EXPIRY_HOURS = process.env
   .PASSWORD_RESET_TOKEN_EXPIRY_HOURS
   ? Number(process.env.PASSWORD_RESET_TOKEN_EXPIRY_HOURS)
@@ -141,9 +145,8 @@ export const VERIFICATION_TOKEN_EXPIRY_HOURS = process.env
   ? Number(process.env.VERIFICATION_TOKEN_EXPIRY_HOURS)
   : 24;
 
-export const ENABLE_NOTIFICATION_EMAILS = process.env.ENABLE_NOTIFICATION_EMAILS
-  ? process.env.ENABLE_NOTIFICATION_EMAILS === 'true'
-  : false;
+export const ENABLE_NOTIFICATION_EMAILS =
+  process.env.ENABLE_NOTIFICATION_EMAILS === 'true';
 
 export const PROJECT_CONFIGS_LOCATION = `${PROJECT_LOCATION}/project-configs`;
 

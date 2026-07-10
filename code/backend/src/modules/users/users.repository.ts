@@ -25,8 +25,8 @@ export class UserRepository {
     });
   }
 
-  async findById(user_id: string): Promise<User | null> {
-    return this.userModel.findByPk(user_id);
+  async findById(user_id: string, raw: boolean = true): Promise<User | null> {
+    return this.userModel.findByPk(user_id, { raw });
   }
 
   async findByEmail(email: string, raw: boolean = true): Promise<User | null> {

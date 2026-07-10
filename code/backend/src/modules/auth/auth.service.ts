@@ -9,10 +9,12 @@ import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { UserRepository } from '../users/users.repository';
 import { PasswordResetTokenRepository } from './password-reset-token.repository';
+import { UserOtpRepository } from './user-otp.repository';
 import { MSG91 } from 'src/util/send-email';
 import {
   VERIFICATION_TOKEN_EXPIRY_HOURS,
   PASSWORD_RESET_TOKEN_EXPIRY_HOURS,
+  OTP_EXPIRY_MINUTES,
 } from 'src/config';
 
 @Injectable()
@@ -21,6 +23,7 @@ export class AuthService {
     private userRepository: UserRepository,
     private jwtService: JwtService,
     private passwordResetTokenRepository: PasswordResetTokenRepository,
+    private userOtpRepository: UserOtpRepository,
   ) {}
 
   async register(name: string, email: string, password: string) {
@@ -196,12 +199,87 @@ export class AuthService {
       email: user.email,
     };
 
+    if (!user.is2faEnabled) {
+      return {
+        token: this.jwtService.sign({
+          sub: user.userId,
+          isEmailVerified: user.isEmailVerified,
+        }),
+        user: userDetails,
+      };
+    }
+
+    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
+
+    await this.userOtpRepository.invalidatePrevious(user.userId, 'login_2fa');
+    await this.userOtpRepository.create({
+      userId: user.userId,
+      otp,
+      type: 'login_2fa',
+      expiresAt,
+    });
+
+    try {
+      await MSG91.sendOtpThroughEmail(user.name, user.email, otp);
+    } catch (err) {
+      console.error('Failed to send OTP email:', err);
+    }
+
+    const tempToken = this.jwtService.sign(
+      { sub: user.userId, purpose: '2fa_login' },
+      { expiresIn: '5m' },
+    );
+
+    return { requiresOtp: true, tempToken };
+  }
+
+  async verifyOtpLogin(tempToken: string, otp: string) {
+    let payload: { sub: string; purpose: string };
+    try {
+      payload = this.jwtService.verify(tempToken);
+    } catch {
+      throw new UnauthorizedException('Invalid or expired login session');
+    }
+
+    if (payload.purpose !== '2fa_login') {
+      throw new UnauthorizedException('Invalid token purpose');
+    }
+
+    const otpRecord = await this.userOtpRepository.findValidByUserIdAndOtp(
+      payload.sub,
+      otp,
+      'login_2fa',
+    );
+
+    if (!otpRecord) {
+      throw new UnauthorizedException('Invalid or expired OTP');
+    }
+
+    await this.userOtpRepository.markUsed(otpRecord.id);
+
+    const user = await this.userRepository.findById(payload.sub);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
     return {
       token: this.jwtService.sign({
         sub: user.userId,
         isEmailVerified: user.isEmailVerified,
       }),
-      user: userDetails,
+      user: {
+        userId: user.userId,
+        name: user.name,
+        email: user.email,
+      },
+    };
+  }
+
+  async toggle2fa(userId: string, enabled: boolean) {
+    await this.userRepository.update(userId, { is2faEnabled: enabled });
+    return {
+      message: `Two-factor authentication ${enabled ? 'enabled' : 'disabled'}.`,
     };
   }
 }

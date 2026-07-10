@@ -16,6 +16,7 @@ import { ExerciseSchedulesModule } from '../exercise-schedules/exercise-schedule
 import { ExerciseCompletionsModule } from '../exercise-completions/exercise-completions.module';
 import { ReportsModule } from '../reports/reports.module';
 import { ExerciseStatsModule } from '../exercise-stats/exercise-stats.module';
+import { ExerciseNotificationsModule } from '../exercise-notifications/exercise-notifications.module';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { EmailVerifiedGuard } from '../../common/guards/email-verified.guard';
 import { SequelizeModule } from '@nestjs/sequelize';
@@ -30,6 +31,7 @@ const imports = [
   ExerciseCompletionsModule,
   ReportsModule,
   ExerciseStatsModule,
+  ExerciseNotificationsModule,
   SequelizeModule.forRoot({
     dialect: 'postgres', // or 'mysql', 'sqlite', etc.
     host: 'localhost',

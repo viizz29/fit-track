@@ -59,11 +59,14 @@ export default function RegisterForm() {
           </Box>
         ) : (
           <Formik
-            initialValues={{ name: "", email: "", password: "" }}
+            initialValues={{ name: "", email: "", password: "", confirmPassword: "" }}
             validationSchema={Yup.object({
               name: Yup.string().required("Required"),
               email: Yup.string().email("Invalid email").required("Required"),
               password: Yup.string().min(6, "At least 6 characters").required("Required"),
+              confirmPassword: Yup.string()
+                .oneOf([Yup.ref("password")], "Passwords must match")
+                .required("Required"),
             })}
             onSubmit={(values, { setSubmitting }) => {
               mutation.mutate({ name: values.name, email: values.email, password: values.password });
@@ -119,6 +122,18 @@ export default function RegisterForm() {
                       ),
                     },
                   }}
+                />
+
+                <TextField
+                  fullWidth
+                  label="Confirm Password"
+                  type={showPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  autoComplete="new-password"
+                  value={values.confirmPassword}
+                  onChange={handleChange}
+                  error={touched.confirmPassword && !!errors.confirmPassword}
+                  helperText={touched.confirmPassword && errors.confirmPassword}
                 />
 
                 <Button type="submit" fullWidth variant="contained">

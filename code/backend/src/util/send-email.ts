@@ -77,7 +77,7 @@ export class MSG91 {
     email: string,
     token: string,
   ) {
-    const templateId = 'email_verification_59';
+    const templateId = 'password_reset_62';
     const company_name = 'Fitrack';
     const reset_link = `${PUBLIC_HOST_WITH_PORT}/reset-password?token=${token}`;
     await sendEmailThroughMsg91(
@@ -92,12 +92,40 @@ export class MSG91 {
     email: string,
     token: string,
   ) {
-    const templateId = 'email_verification_59';
+    const templateId = 'email_verification_new_3';
     const company_name = 'Fitrack';
     const verification_link = `${PUBLIC_HOST_WITH_PORT}/verify-email?token=${token}`;
     await sendEmailThroughMsg91(
       templateId,
       { verification_link, company_name, name },
+      [{ name, email }],
+    );
+  }
+
+  public static async sendUpcomingTaskNotification(
+    name: string,
+    email: string,
+    task_name: string,
+    task_description: string,
+  ) {
+    const templateId = 'upcoming_task';
+    await sendEmailThroughMsg91(
+      templateId,
+      { task_name, task_description, name },
+      [{ name, email }],
+    );
+  }
+
+  public static async sendMissedTaskNotification(
+    name: string,
+    email: string,
+    task_name: string,
+    task_description: string,
+  ) {
+    const templateId = 'missed_task';
+    await sendEmailThroughMsg91(
+      templateId,
+      { task_name, task_description, name },
       [{ name, email }],
     );
   }

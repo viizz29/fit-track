@@ -59,6 +59,13 @@ export const registerApi = async (
   return response;
 };
 
+export const resendEmailVerificationLink = async (email: string) => {
+  const response = await api.post("/api/v1/auth/resend-verification", {
+    email,
+  });
+  return response;
+};
+
 export const verifyEmailApi = async (token: string) => {
   const response = await api.post("/api/v1/auth/verify-email", { token });
   return response.data;
@@ -74,5 +81,18 @@ export const resetPasswordApi = async (token: string, password: string) => {
     token,
     password,
   });
+  return response.data;
+};
+
+export const verifyOtpLoginApi = async (tempToken: string, otp: string) => {
+  const response = await api.post("/api/v1/auth/verify-otp-login", {
+    tempToken,
+    otp,
+  });
+  return response.data;
+};
+
+export const toggle2faApi = async (enabled: boolean) => {
+  const response = await api.post("/api/v1/auth/toggle-2fa", { enabled });
   return response.data;
 };
