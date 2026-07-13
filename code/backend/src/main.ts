@@ -1,6 +1,15 @@
+// load custom config values
+import path, { join } from 'path';
+process.env.TZ = 'America/Danmarkshavn';
+process.env.PROJECT_LOCATION = path.dirname(__dirname);
+process.env.WORKING_DIRECTORY = process.cwd();
+process.env.RESOURCES_LOCATION = `${process.env.PROJECT_LOCATION}/res`;
+process.env.FRONTEND_BUILD_PATH = process.env.FRONTEND_BUILD_PATH
+  ? process.env.FRONTEND_BUILD_PATH
+  : join(__dirname, '..', 'public');
+
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import { API_BASE_URL, APP_ENV, DOCS_URL, PORT } from './config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { FieldNmaeTransformerPipe } from './common/field-name-transformer.pipe';
@@ -11,7 +20,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // Define the base URL prefix for all routes
-  app.setGlobalPrefix(API_BASE_URL);
+  app.setGlobalPrefix(process.env.API_BASE_URL || '/api/v1');
 
   //   app.setGlobalPrefix('api', {
   //   exclude: ['health', 'public/webhook'],
@@ -48,9 +57,9 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
 
   // Setup the UI at the /api endpoint
-  SwaggerModule.setup(DOCS_URL, app, document, {
+  SwaggerModule.setup(process.env.DOCS_URL || '/docs', app, document, {
     customCss: '.swagger-ui .topbar { display: none }',
-    customSiteTitle: `${APP_ENV}`,
+    customSiteTitle: `${process.env.APP_ENV}`,
     customJs: `/api/swagger-init.js`,
   });
 
@@ -65,7 +74,11 @@ async function bootstrap() {
 
   app.useGlobalInterceptors(new EncodeIdInterceptor());
 
-  await app.listen(PORT);
+  app.enableShutdownHooks();
+
+  app.useStaticAssets(process.env.FRONTEND_BUILD_PATH || 'public');
+
+  await app.listen(process.env.PORT || 3000);
 }
 
 bootstrap()

@@ -9,7 +9,6 @@ import { ExerciseCompletion } from '../exercise-completions/exercise-completion.
 import { User } from '../users/user.model';
 import { EmailNotificationsService } from '../email-notifications/email-notifications.service';
 import { MSG91 } from '../../util/send-email';
-import { ENABLE_NOTIFICATION_EMAILS } from '../../config';
 
 const WINDOW_MINUTES = 15;
 
@@ -27,6 +26,8 @@ export class ExerciseNotificationsService {
 
   @Cron(CronExpression.EVERY_MINUTE)
   async sendExerciseNotifications() {
+    const { ENABLE_NOTIFICATION_EMAILS } = process.env;
+
     if (!ENABLE_NOTIFICATION_EMAILS) return;
 
     const now = new Date();
@@ -35,7 +36,12 @@ export class ExerciseNotificationsService {
       include: [
         {
           model: User,
-          attributes: ['userId', 'name', 'email', 'isEmailNotificationsEnabled'],
+          attributes: [
+            'userId',
+            'name',
+            'email',
+            'isEmailNotificationsEnabled',
+          ],
         },
         { model: ExerciseType, attributes: ['id', 'name', 'description'] },
       ],

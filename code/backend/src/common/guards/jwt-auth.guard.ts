@@ -1,12 +1,15 @@
 import { Injectable, ExecutionContext } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Reflector } from '@nestjs/core';
-import { API_BASE_URL } from '../../config';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
-  constructor(private reflector: Reflector) {
+  constructor(
+    private reflector: Reflector,
+    private readonly configService: ConfigService,
+  ) {
     super();
   }
 
@@ -18,6 +21,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     if (isPublic) {
       return true;
     }
+
+    const { API_BASE_URL } = process.env;
 
     const request = context.switchToHttp().getRequest();
     const path = request.route?.path || request.url;

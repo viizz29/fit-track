@@ -7,7 +7,6 @@ import { ExerciseSchedulesRepository } from '../exercise-schedules/exercise-sche
 import { User } from '../users/user.model';
 import { ExerciseCompletion } from '../exercise-completions/exercise-completion.model';
 import { ExerciseSchedule } from '../exercise-schedules/exercise-schedule.model';
-import { SCHEDULED_TASKS_ENABLED } from '../../config';
 
 @Injectable()
 export class ExerciseStatsService {
@@ -23,6 +22,7 @@ export class ExerciseStatsService {
   // @Cron('0 */1 * * * *') // every minute
   @Cron(CronExpression.EVERY_MINUTE)
   async computeDailyStats() {
+    const { SCHEDULED_TASKS_ENABLED } = process.env;
     if (!SCHEDULED_TASKS_ENABLED) return;
 
     const yesterday = new Date();
@@ -138,7 +138,8 @@ export class ExerciseStatsService {
         case 'DAILY':
           return true;
         case 'WEEKLY': {
-          if (!schedule.weekdays || schedule.weekdays.length === 0) return false;
+          if (!schedule.weekdays || schedule.weekdays.length === 0)
+            return false;
           return schedule.weekdays.includes(dayNames[date.getDay()]);
         }
         default:

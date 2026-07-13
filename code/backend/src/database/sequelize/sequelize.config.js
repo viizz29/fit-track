@@ -1,25 +1,11 @@
 // src/database/sequelize.config.js
-require('ts-node/register');
-require('module-alias/register');
-
-require('module-alias').addAlias('@', `${process.cwd()}/src`);
-
-const configs = require('../../config.ts');
-
-// console.log(configs.DB_PASSWORD);
-
-const PASS = decodeURIComponent(configs.DB_PASSWORD);
-
-// console.log(PASS);
+require('dotenv').config({ path: `.env.${process.env.NODE_ENV}` });
+const PASS = decodeURIComponent(process.env.DB_PASSWORD);
 
 module.exports = {
-  username: configs.DB_USERNAME,
+  username: process.env.DB_USERNAME,
   password: PASS,
-  database: configs.DB_DATABASE,
-  host: configs.DB_HOST,
+  database: process.env.DB_DATABASE,
+  host: process.env.DB_HOST,
   dialect: 'postgres',
 };
-
-// test
-
-// test 2

@@ -169,7 +169,7 @@ export default function Reports() {
 
   const rateColumns: Column<CompletionRatePerExercise>[] = [
     { key: "exerciseName", label: t("exercise"), sortable: true },
-    { key: "totalScheduled", label: t("scheduled"), sortable: true, align: "center" },
+    { key: "totalScheduled", label: t("scheduled"), sortable: true, align: "center", hideOnMobile: true },
     { key: "totalCompleted", label: t("Completed"), sortable: true, align: "center" },
     { key: "rate", label: t("rate"), sortable: true, render: (row) => <RateBar value={row.rate} /> },
   ];

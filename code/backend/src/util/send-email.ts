@@ -1,9 +1,3 @@
-import {
-  MAILING_DOMAIN_FOR_MSG91,
-  MSG91_AUTH_KEY,
-  PUBLIC_HOST_WITH_PORT,
-} from 'src/config';
-
 const url = new URL('https://control.msg91.com/api/v5/email/send');
 
 export interface EmailRecipient {
@@ -16,6 +10,8 @@ const sendEmailThroughMsg91 = async (
   variables: Record<string, string>,
   to: EmailRecipient[],
 ) => {
+  const { MSG91_AUTH_KEY, MAILING_DOMAIN_FOR_MSG91 } = process.env;
+
   if (!MSG91_AUTH_KEY) {
     console.log('Msg91 auth key not defined !');
     return;
@@ -77,6 +73,8 @@ export class MSG91 {
     email: string,
     token: string,
   ) {
+    const { PUBLIC_HOST_WITH_PORT } = process.env;
+
     const templateId = 'password_reset_62';
     const company_name = 'Fitrack';
     const reset_link = `${PUBLIC_HOST_WITH_PORT}/reset-password?token=${token}`;
@@ -92,6 +90,8 @@ export class MSG91 {
     email: string,
     token: string,
   ) {
+    const { PUBLIC_HOST_WITH_PORT } = process.env;
+
     const templateId = 'email_verification_new_3';
     const company_name = 'Fitrack';
     const verification_link = `${PUBLIC_HOST_WITH_PORT}/verify-email?token=${token}`;

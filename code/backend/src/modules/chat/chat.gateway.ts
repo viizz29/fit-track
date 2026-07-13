@@ -10,10 +10,9 @@ import {
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { UnauthorizedException } from '@nestjs/common';
-import { JWT_SECRET, SOCKETIO_ENDPOINT } from 'src/config';
 
 @WebSocketGateway({
-  path: `${SOCKETIO_ENDPOINT}`,
+  path: `${process.env.SOCKETIO_ENDPOINT}`,
   cors: {
     origin: '*', // Adjust for production security
   },
@@ -25,6 +24,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(private jwtService: JwtService) {}
 
   async handleConnection(client: Socket) {
+    const { JWT_SECRET } = process.env;
     try {
       // Extract token from handshake headers or auth object
       const token =

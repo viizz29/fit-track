@@ -20,19 +20,33 @@ import {
   SkipEmailVerification,
 } from 'src/common/decorators/public.decorator';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { Throttle } from '@nestjs/throttler';
 
 @ApiTags('auth')
 @Controller('v1/auth')
+@Throttle({
+  default: {
+    ttl: 60_000,
+    limit: 10,
+  },
+})
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Public()
   @Get('test')
-  getHello(): string {
+  test(): string {
+    console.log('Test API Hit !');
     return 'auth test';
   }
 
   @Public()
+  @Throttle({
+    default: {
+      ttl: 60_000,
+      limit: 5,
+    },
+  })
   @ApiOperation({ summary: 'Register a new user' })
   @ApiBody({ type: RegisterDto })
   @ApiResponse({
@@ -56,6 +70,12 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({
+    default: {
+      ttl: 60_000,
+      limit: 3,
+    },
+  })
   @ApiOperation({ summary: 'Resend verification email' })
   @ApiBody({ type: ResendVerificationDto })
   @ApiResponse({ status: 200, description: 'Verification email resent.' })
@@ -69,6 +89,12 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({
+    default: {
+      ttl: 60_000,
+      limit: 3,
+    },
+  })
   @ApiOperation({ summary: 'Request password reset email' })
   @ApiBody({ type: ForgotPasswordDto })
   @ApiResponse({ status: 200, description: 'Reset link sent if email exists.' })
@@ -78,6 +104,12 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({
+    default: {
+      ttl: 60_000,
+      limit: 5,
+    },
+  })
   @ApiOperation({ summary: 'Reset password using token' })
   @ApiBody({ type: ResetPasswordDto })
   @ApiResponse({ status: 200, description: 'Password reset successfully.' })
@@ -87,6 +119,12 @@ export class AuthController {
     return this.authService.resetPassword(dto.token, dto.password);
   }
 
+  @Throttle({
+    default: {
+      ttl: 60_000,
+      limit: 5,
+    },
+  })
   @Public()
   @ApiOperation({ summary: 'User Login' })
   @ApiBody({ type: LoginDto })
@@ -99,6 +137,12 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({
+    default: {
+      ttl: 60_000,
+      limit: 5,
+    },
+  })
   @ApiOperation({ summary: 'Verify OTP for 2FA login step 2' })
   @ApiBody({ type: VerifyOtpLoginDto })
   @ApiResponse({ status: 200, description: 'Return JWT access token.' })

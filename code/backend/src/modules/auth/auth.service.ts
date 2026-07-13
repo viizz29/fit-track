@@ -11,12 +11,6 @@ import { UserRepository } from '../users/users.repository';
 import { PasswordResetTokenRepository } from './password-reset-token.repository';
 import { UserOtpRepository } from './user-otp.repository';
 import { MSG91 } from 'src/util/send-email';
-import {
-  VERIFICATION_TOKEN_EXPIRY_HOURS,
-  PASSWORD_RESET_TOKEN_EXPIRY_HOURS,
-  OTP_EXPIRY_MINUTES,
-} from 'src/config';
-
 @Injectable()
 export class AuthService {
   constructor(
@@ -27,6 +21,8 @@ export class AuthService {
   ) {}
 
   async register(name: string, email: string, password: string) {
+    const { VERIFICATION_TOKEN_EXPIRY_HOURS } = process.env;
+
     const existing = await this.userRepository.findByEmail(email);
     if (existing) {
       throw new ConflictException('Email already in use');
@@ -36,7 +32,9 @@ export class AuthService {
 
     const verificationToken = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + VERIFICATION_TOKEN_EXPIRY_HOURS);
+    expiresAt.setHours(
+      expiresAt.getHours() + Number(VERIFICATION_TOKEN_EXPIRY_HOURS),
+    );
 
     const user = await this.userRepository.create({
       name,
@@ -87,6 +85,7 @@ export class AuthService {
   }
 
   async resendVerification(email: string) {
+    const { VERIFICATION_TOKEN_EXPIRY_HOURS } = process.env;
     const user = await this.userRepository.findByEmail(email);
     if (!user) {
       throw new BadRequestException('No account found with this email');
@@ -98,7 +97,9 @@ export class AuthService {
 
     const verificationToken = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + VERIFICATION_TOKEN_EXPIRY_HOURS);
+    expiresAt.setHours(
+      expiresAt.getHours() + Number(VERIFICATION_TOKEN_EXPIRY_HOURS),
+    );
 
     await this.userRepository.update(user.userId, {
       emailVerificationToken: verificationToken,
@@ -122,6 +123,7 @@ export class AuthService {
   }
 
   async forgotPassword(email: string) {
+    const { PASSWORD_RESET_TOKEN_EXPIRY_HOURS } = process.env;
     const user = await this.userRepository.findByEmail(email);
     if (user) {
       await this.passwordResetTokenRepository.invalidatePreviousTokens(
@@ -131,7 +133,7 @@ export class AuthService {
       const token = crypto.randomBytes(32).toString('hex');
       const expiresAt = new Date();
       expiresAt.setHours(
-        expiresAt.getHours() + PASSWORD_RESET_TOKEN_EXPIRY_HOURS,
+        expiresAt.getHours() + Number(PASSWORD_RESET_TOKEN_EXPIRY_HOURS),
       );
 
       await this.passwordResetTokenRepository.create({
@@ -181,6 +183,7 @@ export class AuthService {
   }
 
   async login(email: string, password: string) {
+    const { OTP_EXPIRY_MINUTES } = process.env;
     const user = await this.userRepository.findOne(email);
 
     if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
@@ -210,7 +213,9 @@ export class AuthService {
     }
 
     const otp = String(Math.floor(100000 + Math.random() * 900000));
-    const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
+    const expiresAt = new Date(
+      Date.now() + Number(OTP_EXPIRY_MINUTES) * 60 * 1000,
+    );
 
     await this.userOtpRepository.invalidatePrevious(user.userId, 'login_2fa');
     await this.userOtpRepository.create({
