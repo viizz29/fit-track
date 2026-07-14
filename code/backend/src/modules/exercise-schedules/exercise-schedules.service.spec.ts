@@ -27,7 +27,7 @@ describe('ExerciseSchedulesService', () => {
 
     service = module.get<ExerciseSchedulesService>(ExerciseSchedulesService);
     repository = module.get<ExerciseSchedulesRepository>(ExerciseSchedulesRepository);
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   it('should be defined', () => {

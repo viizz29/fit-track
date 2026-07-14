@@ -64,7 +64,9 @@ async function bootstrap() {
   });
 
   // Enable CORS for all origins
-  app.enableCors();
+  if (process.env.NODE_ENV != 'production') {
+    app.enableCors();
+  }
 
   // app.enableCors({
   //   origin: true, // or your frontend URL
@@ -76,9 +78,13 @@ async function bootstrap() {
 
   app.enableShutdownHooks();
 
-  app.useStaticAssets(process.env.FRONTEND_BUILD_PATH || 'public');
+  // app.useStaticAssets(process.env.FRONTEND_BUILD_PATH || 'public');
 
-  await app.listen(process.env.PORT || 3000);
+  if (process.env.NODE_ENV == 'production') {
+    await app.listen(process.env.PORT || 3000, '0.0.0.0');
+  } else {
+    await app.listen(process.env.PORT || 3000);
+  }
 }
 
 bootstrap()

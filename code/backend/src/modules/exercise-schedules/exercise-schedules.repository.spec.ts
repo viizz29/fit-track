@@ -175,9 +175,7 @@ describe('ExerciseSchedulesRepository', () => {
       const schedule = makeSchedule('sched-1', 'DAILY', null, '2026-06-30T08:00:00.000Z');
       mockScheduleModel.findAll.mockResolvedValue([schedule]);
       mockCompletionModel.findAll.mockResolvedValue([
-        {
-          get: (key: string) => key === 'scheduleId' ? 'sched-1' : new Date('2026-07-01T10:00:00Z'),
-        },
+        { scheduleId: 'sched-1', completionDatetime: new Date('2026-07-01T10:00:00Z') },
       ]);
 
       const result = await repository.findByDate('user-1', '2026-07-01');

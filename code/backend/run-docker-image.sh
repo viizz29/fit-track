@@ -1,0 +1,1 @@
+docker run --name fitrack --env-file .env.production -p 5701:5701 fitrack:latest

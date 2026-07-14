@@ -21,6 +21,8 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import envValueValidations from 'src/lib/env-value-validations';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { HealthModule } from '../health/health.module';
 
 const imports = [
   ConfigModule.forRoot({
@@ -42,8 +44,16 @@ const imports = [
     inject: [ConfigService],
     useFactory: (config: ConfigService) => ({
       dialect: 'postgres', // or 'mysql', 'sqlite', etc.
-      host: 'localhost',
       port: 5432,
+
+      dialectOptions: {
+        ssl: {
+          require: true,
+          rejectUnauthorized: false, // set to true if you have a CA certificate
+        },
+      },
+
+      host: config.getOrThrow('DB_HOST'),
       username: config.getOrThrow('DB_USERNAME'),
       password: config.getOrThrow('DB_PASSWORD'),
       database: config.getOrThrow('DB_DATABASE'),
@@ -62,30 +72,43 @@ const imports = [
       // query: { raw: true },
     }),
   }),
+  ServeStaticModule.forRoot({
+    rootPath: process.env.FRONTEND_BUILD_PATH,
+    renderPath: '/{*path}',
+  }),
   CacheModule.registerAsync({
     isGlobal: true,
     imports: [ConfigModule],
     inject: [ConfigService],
-    useFactory: async (config: ConfigService) => ({
-      store: await redisStore({
-        url: config.getOrThrow<string>('REDIS_URL'),
-      }),
-    }),
+    useFactory: async (config: ConfigService) => {
+      const { REDIS_HOST, REDIS_PORT, REDIS_USER, REDIS_PASSWORD } =
+        process.env;
+      const url = `redis://${REDIS_USER}:${REDIS_PASSWORD}@${REDIS_HOST}:${REDIS_PORT}`;
+      return {
+        store: await redisStore({
+          url,
+        }),
+      };
+    },
   }),
+  HealthModule,
   ThrottlerModule.forRootAsync({
     imports: [ConfigModule],
     inject: [ConfigService],
-    useFactory: (config: ConfigService) => ({
-      throttlers: [
-        {
-          ttl: seconds(60),
-          limit: 20,
-        },
-      ],
-      storage: new ThrottlerStorageRedisService(
-        config.getOrThrow<string>('REDIS_URL'),
-      ),
-    }),
+    useFactory: (config: ConfigService) => {
+      const { REDIS_HOST, REDIS_PORT, REDIS_USER, REDIS_PASSWORD } =
+        process.env;
+      const url = `redis://${REDIS_USER}:${REDIS_PASSWORD}@${REDIS_HOST}:${REDIS_PORT}`;
+      return {
+        throttlers: [
+          {
+            ttl: seconds(60),
+            limit: 20,
+          },
+        ],
+        storage: new ThrottlerStorageRedisService(url),
+      };
+    },
   }),
 ];
 
