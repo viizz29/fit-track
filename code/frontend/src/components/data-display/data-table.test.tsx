@@ -47,7 +47,7 @@ describe("DataTable", () => {
     render(
       <DataTable
         columns={columns}
-        data={[]}
+        data={[] as TestRow[]}
         getRowKey={(row) => row.id}
         emptyMessage="Nothing here"
       />
@@ -60,7 +60,7 @@ describe("DataTable", () => {
     const { container } = render(
       <DataTable
         columns={columns}
-        data={[]}
+        data={[] as TestRow[]}
         getRowKey={(row) => row.id}
         loading={true}
       />
@@ -100,7 +100,7 @@ describe("DataTable", () => {
     render(
       <DataTable
         columns={columns}
-        data={[]}
+        data={[] as TestRow[]}
         getRowKey={(row) => row.id}
       />
     );

@@ -34,7 +34,7 @@ describe("API client", () => {
       headers: {} as Record<string, string>,
     } as any;
 
-    const resolved = await api.interceptors.request.handlers[0].fulfilled(config);
+    const resolved = await api.interceptors.request.handlers![0].fulfilled(config);
     expect(resolved.headers.Authorization).toBe("Bearer my-jwt-token");
   });
 
@@ -47,7 +47,7 @@ describe("API client", () => {
       headers: {} as Record<string, string>,
     } as any;
 
-    const resolved = await api.interceptors.request.handlers[0].fulfilled(config);
+    const resolved = await api.interceptors.request.handlers![0].fulfilled(config);
     expect(resolved.headers.Authorization).toBe("Bearer quoted-token");
   });
 
@@ -58,7 +58,7 @@ describe("API client", () => {
       headers: {} as Record<string, string>,
     } as any;
 
-    const resolved = await api.interceptors.request.handlers[0].fulfilled(config);
+    const resolved = await api.interceptors.request.handlers![0].fulfilled(config);
     expect(resolved.headers.Authorization).toBeUndefined();
   });
 
@@ -66,7 +66,7 @@ describe("API client", () => {
     const error = { response: { status: 401 } };
 
     try {
-      await api.interceptors.response.handlers[0].rejected(error);
+      await api.interceptors.response.handlers![0].rejected!(error);
     } catch {
       // expected rejection
     }
@@ -78,7 +78,7 @@ describe("API client", () => {
     const error = { response: { status: 500 } };
 
     try {
-      await api.interceptors.response.handlers[0].rejected(error);
+      await api.interceptors.response.handlers![0].rejected!(error);
     } catch {
       // expected rejection
     }
@@ -90,7 +90,7 @@ describe("API client", () => {
     const error = { response: { status: 500 }, message: "Server Error" };
 
     await expect(
-      api.interceptors.response.handlers[0].rejected(error)
+      api.interceptors.response.handlers![0].rejected!(error)
     ).rejects.toEqual(error);
   });
 });
