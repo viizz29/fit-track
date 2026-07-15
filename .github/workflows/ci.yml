@@ -8,7 +8,7 @@ on:
 
 env:
   NODE_VERSION: '20'
-  DOCKER_IMAGE_BACKEND: fittrack/backend
+  DOCKER_IMAGE_BACKEND: ${{ vars.DOCKERHUB_USERNAME }}/fitrack
 
 jobs:
   backend:
