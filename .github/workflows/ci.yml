@@ -110,6 +110,9 @@ jobs:
           name: frontend-dist
           path: code/frontend/dist/
 
+      - name: Move frontend build to backend/public
+        run: mv code/frontend/dist code/backend/public
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
