@@ -23,7 +23,23 @@ export class SmtpProvider implements MailProvider {
   }
 
   async sendMail(options: SendMailOptions): Promise<void> {
-    const { MAIL_FROM_ADDRESS } = process.env;
+    const {
+      MAIL_FROM_ADDRESS,
+      SMTP_HOST,
+      SMTP_PORT,
+      SMTP_SECURE,
+      SMTP_USERNAME,
+      SMTP_PASSWORD,
+    } = process.env;
+
+    console.log({
+      SMTP_HOST,
+      SMTP_PORT,
+      SMTP_SECURE,
+      SMTP_USERNAME,
+      SMTP_PASSWORD,
+    });
+
     await this.transporter.sendMail({
       from: MAIL_FROM_ADDRESS,
       to: options.to,
