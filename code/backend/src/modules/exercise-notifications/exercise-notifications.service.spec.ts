@@ -4,18 +4,12 @@ import { EmailNotificationsService } from '../email-notifications/email-notifica
 import { ExerciseSchedule } from '../exercise-schedules/exercise-schedule.model';
 import { ExerciseCompletion } from '../exercise-completions/exercise-completion.model';
 import { getModelToken } from '@nestjs/sequelize';
-import { MSG91 } from '../../util/send-email';
-
-jest.mock('../../util/send-email', () => ({
-  MSG91: {
-    sendUpcomingTaskNotification: jest.fn().mockResolvedValue(undefined),
-    sendMissedTaskNotification: jest.fn().mockResolvedValue(undefined),
-  },
-}));
+import { MailService } from '../mail/mail.service';
 
 describe('ExerciseNotificationsService', () => {
   let service: ExerciseNotificationsService;
   let emailNotificationsService: jest.Mocked<EmailNotificationsService>;
+  let mailService: jest.Mocked<MailService>;
   let exerciseScheduleModel: { findAll: jest.Mock };
   let exerciseCompletionModel: { count: jest.Mock };
   let originalEnableNotifications: string | undefined;
@@ -23,12 +17,11 @@ describe('ExerciseNotificationsService', () => {
   beforeEach(async () => {
     originalEnableNotifications = process.env.ENABLE_NOTIFICATION_EMAILS;
     jest.clearAllMocks();
-    (MSG91.sendUpcomingTaskNotification as jest.Mock).mockResolvedValue(
-      undefined,
-    );
-    (MSG91.sendMissedTaskNotification as jest.Mock).mockResolvedValue(
-      undefined,
-    );
+
+    mailService = {
+      sendUpcomingTaskNotification: jest.fn().mockResolvedValue(undefined),
+      sendMissedTaskNotification: jest.fn().mockResolvedValue(undefined),
+    } as any;
 
     exerciseScheduleModel = { findAll: jest.fn() };
     exerciseCompletionModel = { count: jest.fn() };
@@ -50,6 +43,10 @@ describe('ExerciseNotificationsService', () => {
         {
           provide: getModelToken(ExerciseCompletion),
           useValue: exerciseCompletionModel,
+        },
+        {
+          provide: MailService,
+          useValue: mailService,
         },
       ],
     }).compile();
@@ -130,7 +127,7 @@ describe('ExerciseNotificationsService', () => {
 
       await service.sendExerciseNotifications();
 
-      expect(MSG91.sendUpcomingTaskNotification).toHaveBeenCalledWith(
+      expect(mailService.sendUpcomingTaskNotification).toHaveBeenCalledWith(
         'John',
         'john@test.com',
         'Push-ups',
@@ -166,7 +163,7 @@ describe('ExerciseNotificationsService', () => {
 
       await service.sendExerciseNotifications();
 
-      expect(MSG91.sendUpcomingTaskNotification).not.toHaveBeenCalled();
+      expect(mailService.sendUpcomingTaskNotification).not.toHaveBeenCalled();
     });
 
     it('should skip upcoming if next occurrence is outside 15-min window', async () => {
@@ -192,7 +189,7 @@ describe('ExerciseNotificationsService', () => {
 
       await service.sendExerciseNotifications();
 
-      expect(MSG91.sendUpcomingTaskNotification).not.toHaveBeenCalled();
+      expect(mailService.sendUpcomingTaskNotification).not.toHaveBeenCalled();
     });
 
     it('should skip upcoming if email is not set', async () => {
@@ -219,7 +216,7 @@ describe('ExerciseNotificationsService', () => {
 
       await service.sendExerciseNotifications();
 
-      expect(MSG91.sendUpcomingTaskNotification).not.toHaveBeenCalled();
+      expect(mailService.sendUpcomingTaskNotification).not.toHaveBeenCalled();
     });
 
     it('should skip upcoming if notifications disabled', async () => {
@@ -246,7 +243,7 @@ describe('ExerciseNotificationsService', () => {
 
       await service.sendExerciseNotifications();
 
-      expect(MSG91.sendUpcomingTaskNotification).not.toHaveBeenCalled();
+      expect(mailService.sendUpcomingTaskNotification).not.toHaveBeenCalled();
     });
 
     it('should handle missed notification for daily schedule', async () => {
@@ -274,7 +271,7 @@ describe('ExerciseNotificationsService', () => {
 
       await service.sendExerciseNotifications();
 
-      expect(MSG91.sendMissedTaskNotification).toHaveBeenCalledWith(
+      expect(mailService.sendMissedTaskNotification).toHaveBeenCalledWith(
         'John',
         'john@test.com',
         'Push-ups',
@@ -313,7 +310,7 @@ describe('ExerciseNotificationsService', () => {
 
       await service.sendExerciseNotifications();
 
-      expect(MSG91.sendMissedTaskNotification).not.toHaveBeenCalled();
+      expect(mailService.sendMissedTaskNotification).not.toHaveBeenCalled();
     });
 
     it('should log FAILED status if upcoming email send fails', async () => {
@@ -337,7 +334,7 @@ describe('ExerciseNotificationsService', () => {
       emailNotificationsService.hasNotificationBeenSent.mockResolvedValue(
         false,
       );
-      (MSG91.sendUpcomingTaskNotification as jest.Mock).mockRejectedValue(
+      mailService.sendUpcomingTaskNotification.mockRejectedValue(
         new Error('Email service down'),
       );
 
@@ -374,7 +371,7 @@ describe('ExerciseNotificationsService', () => {
         false,
       );
       exerciseCompletionModel.count.mockResolvedValue(0);
-      (MSG91.sendMissedTaskNotification as jest.Mock).mockRejectedValue(
+      mailService.sendMissedTaskNotification.mockRejectedValue(
         new Error('Email service down'),
       );
 
@@ -426,7 +423,7 @@ describe('ExerciseNotificationsService', () => {
 
       await service.sendExerciseNotifications();
 
-      expect(MSG91.sendUpcomingTaskNotification).toHaveBeenCalled();
+      expect(mailService.sendUpcomingTaskNotification).toHaveBeenCalled();
     });
 
     it('should handle weekly schedule with matching weekday', async () => {
@@ -457,7 +454,7 @@ describe('ExerciseNotificationsService', () => {
 
       await service.sendExerciseNotifications();
 
-      expect(MSG91.sendUpcomingTaskNotification).toHaveBeenCalled();
+      expect(mailService.sendUpcomingTaskNotification).toHaveBeenCalled();
     });
 
     it('should skip weekly schedule with non-matching weekday', async () => {
@@ -487,7 +484,7 @@ describe('ExerciseNotificationsService', () => {
 
       await service.sendExerciseNotifications();
 
-      expect(MSG91.sendUpcomingTaskNotification).not.toHaveBeenCalled();
+      expect(mailService.sendUpcomingTaskNotification).not.toHaveBeenCalled();
     });
   });
 });

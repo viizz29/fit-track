@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { UserRepository } from '../users/users.repository';
 import { PasswordResetTokenRepository } from './password-reset-token.repository';
 import { UserOtpRepository } from './user-otp.repository';
+import { MailService } from '../mail/mail.service';
 import {
   UnauthorizedException,
   BadRequestException,
@@ -20,17 +21,8 @@ jest.mock('crypto', () => ({
   }),
 }));
 
-jest.mock('../../util/send-email', () => ({
-  MSG91: {
-    sendVerificationEmail: jest.fn().mockResolvedValue(undefined),
-    sendPasswordResetEmail: jest.fn().mockResolvedValue(undefined),
-    sendOtpThroughEmail: jest.fn().mockResolvedValue(undefined),
-  },
-}));
-
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
-import { MSG91 } from '../../util/send-email';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -38,6 +30,7 @@ describe('AuthService', () => {
   let jwtService: { sign: jest.Mock; verify: jest.Mock };
   let passwordResetTokenRepository: jest.Mocked<PasswordResetTokenRepository>;
   let userOtpRepository: jest.Mocked<UserOtpRepository>;
+  let mailService: jest.Mocked<MailService>;
 
   const mockUser = {
     userId: 'user-123',
@@ -53,9 +46,12 @@ describe('AuthService', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-password');
-    (MSG91.sendVerificationEmail as jest.Mock).mockResolvedValue(undefined);
-    (MSG91.sendPasswordResetEmail as jest.Mock).mockResolvedValue(undefined);
-    (MSG91.sendOtpThroughEmail as jest.Mock).mockResolvedValue(undefined);
+
+    mailService = {
+      sendVerificationEmail: jest.fn().mockResolvedValue(undefined),
+      sendPasswordResetEmail: jest.fn().mockResolvedValue(undefined),
+      sendOtp: jest.fn().mockResolvedValue(undefined),
+    } as any;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -96,6 +92,10 @@ describe('AuthService', () => {
             invalidatePrevious: jest.fn(),
           },
         },
+        {
+          provide: MailService,
+          useValue: mailService,
+        },
       ],
     }).compile();
 
@@ -132,7 +132,7 @@ describe('AuthService', () => {
           emailVerificationToken: 'mock-token-hex',
         }),
       );
-      expect(MSG91.sendVerificationEmail).toHaveBeenCalledWith(
+      expect(mailService.sendVerificationEmail).toHaveBeenCalledWith(
         'John',
         'john@test.com',
         'mock-token-hex',
@@ -154,7 +154,7 @@ describe('AuthService', () => {
     it('should still succeed if email sending fails', async () => {
       userRepository.findByEmail.mockResolvedValue(null);
       userRepository.create.mockResolvedValue(mockUser as any);
-      (MSG91.sendVerificationEmail as jest.Mock).mockRejectedValue(
+      mailService.sendVerificationEmail.mockRejectedValue(
         new Error('Email service down'),
       );
 
@@ -238,7 +238,7 @@ describe('AuthService', () => {
 
       expect(userRepository.findByEmail).toHaveBeenCalledWith('john@test.com');
       expect(crypto.randomBytes).toHaveBeenCalledWith(32);
-      expect(MSG91.sendVerificationEmail).toHaveBeenCalled();
+      expect(mailService.sendVerificationEmail).toHaveBeenCalled();
       expect(result).toEqual({
         message:
           'Verification email resent successfully. Please check your email.',
@@ -282,7 +282,7 @@ describe('AuthService', () => {
           token: 'mock-token-hex',
         }),
       );
-      expect(MSG91.sendPasswordResetEmail).toHaveBeenCalledWith(
+      expect(mailService.sendPasswordResetEmail).toHaveBeenCalledWith(
         'John',
         'john@test.com',
         'mock-token-hex',
@@ -423,9 +423,9 @@ describe('AuthService', () => {
       } as any);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
-      await expect(service.login('john@test.com', 'pass1234')).rejects.toThrow(
-        UnauthorizedException,
-      );
+      await expect(
+        service.login('john@test.com', 'pass1234'),
+      ).rejects.toThrow(UnauthorizedException);
     });
 
     it('should return requiresOtp and tempToken when 2FA is enabled', async () => {
@@ -451,7 +451,7 @@ describe('AuthService', () => {
           type: 'login_2fa',
         }),
       );
-      expect(MSG91.sendOtpThroughEmail).toHaveBeenCalled();
+      expect(mailService.sendOtp).toHaveBeenCalled();
       expect(jwtService.sign).toHaveBeenCalledWith(
         { sub: 'user-123', purpose: '2fa_login' },
         { expiresIn: '5m' },
