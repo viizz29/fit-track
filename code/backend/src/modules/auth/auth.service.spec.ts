@@ -115,7 +115,11 @@ describe('AuthService', () => {
       userRepository.findByEmail.mockResolvedValue(null);
       userRepository.create.mockResolvedValue(mockUser as any);
 
-      const result = await service.register('John', 'john@test.com', 'pass1234');
+      const result = await service.register(
+        'John',
+        'john@test.com',
+        'pass1234',
+      );
 
       expect(userRepository.findByEmail).toHaveBeenCalledWith('john@test.com');
       expect(bcrypt.hash).toHaveBeenCalledWith('pass1234', 10);
@@ -134,7 +138,8 @@ describe('AuthService', () => {
         'mock-token-hex',
       );
       expect(result).toEqual({
-        message: 'Account created successfully. Please check your email to verify your account.',
+        message:
+          'Account created successfully. Please check your email to verify your account.',
       });
     });
 
@@ -153,10 +158,15 @@ describe('AuthService', () => {
         new Error('Email service down'),
       );
 
-      const result = await service.register('John', 'john@test.com', 'pass1234');
+      const result = await service.register(
+        'John',
+        'john@test.com',
+        'pass1234',
+      );
 
       expect(result).toEqual({
-        message: 'Account created successfully. Please check your email to verify your account.',
+        message:
+          'Account created successfully. Please check your email to verify your account.',
       });
     });
   });
@@ -171,7 +181,9 @@ describe('AuthService', () => {
 
       const result = await service.verifyEmail('valid-token');
 
-      expect(userRepository.findByVerificationToken).toHaveBeenCalledWith('valid-token');
+      expect(userRepository.findByVerificationToken).toHaveBeenCalledWith(
+        'valid-token',
+      );
       expect(userRepository.update).toHaveBeenCalledWith('user-123', {
         isEmailVerified: true,
         emailVerificationToken: null,
@@ -228,7 +240,8 @@ describe('AuthService', () => {
       expect(crypto.randomBytes).toHaveBeenCalledWith(32);
       expect(MSG91.sendVerificationEmail).toHaveBeenCalled();
       expect(result).toEqual({
-        message: 'Verification email resent successfully. Please check your email.',
+        message:
+          'Verification email resent successfully. Please check your email.',
       });
     });
 
@@ -246,9 +259,9 @@ describe('AuthService', () => {
         isEmailVerified: true,
       } as any);
 
-      await expect(
-        service.resendVerification('john@test.com'),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.resendVerification('john@test.com')).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -260,9 +273,9 @@ describe('AuthService', () => {
 
       const result = await service.forgotPassword('john@test.com');
 
-      expect(passwordResetTokenRepository.invalidatePreviousTokens).toHaveBeenCalledWith(
-        'user-123',
-      );
+      expect(
+        passwordResetTokenRepository.invalidatePreviousTokens,
+      ).toHaveBeenCalledWith('user-123');
       expect(passwordResetTokenRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           userId: 'user-123',
@@ -275,7 +288,8 @@ describe('AuthService', () => {
         'mock-token-hex',
       );
       expect(result).toEqual({
-        message: 'If an account with that email exists, a password reset link has been sent.',
+        message:
+          'If an account with that email exists, a password reset link has been sent.',
       });
     });
 
@@ -286,7 +300,8 @@ describe('AuthService', () => {
 
       expect(passwordResetTokenRepository.create).not.toHaveBeenCalled();
       expect(result).toEqual({
-        message: 'If an account with that email exists, a password reset link has been sent.',
+        message:
+          'If an account with that email exists, a password reset link has been sent.',
       });
     });
   });
@@ -309,7 +324,9 @@ describe('AuthService', () => {
       expect(userRepository.update).toHaveBeenCalledWith('user-123', {
         passwordHash: 'hashed-password',
       });
-      expect(passwordResetTokenRepository.markUsed).toHaveBeenCalledWith('token-1');
+      expect(passwordResetTokenRepository.markUsed).toHaveBeenCalledWith(
+        'token-1',
+      );
       expect(result).toEqual({
         message: 'Password has been reset successfully.',
       });
@@ -364,7 +381,10 @@ describe('AuthService', () => {
       const result = await service.login('john@test.com', 'pass1234');
 
       expect(userRepository.findOne).toHaveBeenCalledWith('john@test.com');
-      expect(bcrypt.compare).toHaveBeenCalledWith('pass1234', 'hashed-password');
+      expect(bcrypt.compare).toHaveBeenCalledWith(
+        'pass1234',
+        'hashed-password',
+      );
       expect(jwtService.sign).toHaveBeenCalledWith({
         sub: 'user-123',
         isEmailVerified: true,
@@ -382,18 +402,18 @@ describe('AuthService', () => {
     it('should throw UnauthorizedException for invalid credentials', async () => {
       userRepository.findOne.mockResolvedValue(null);
 
-      await expect(
-        service.login('john@test.com', 'wrong'),
-      ).rejects.toThrow(UnauthorizedException);
+      await expect(service.login('john@test.com', 'wrong')).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should throw UnauthorizedException for wrong password', async () => {
       userRepository.findOne.mockResolvedValue(mockUser as any);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
-      await expect(
-        service.login('john@test.com', 'wrong'),
-      ).rejects.toThrow(UnauthorizedException);
+      await expect(service.login('john@test.com', 'wrong')).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should throw UnauthorizedException if email not verified', async () => {
@@ -403,9 +423,9 @@ describe('AuthService', () => {
       } as any);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
-      await expect(
-        service.login('john@test.com', 'pass1234'),
-      ).rejects.toThrow(UnauthorizedException);
+      await expect(service.login('john@test.com', 'pass1234')).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should return requiresOtp and tempToken when 2FA is enabled', async () => {

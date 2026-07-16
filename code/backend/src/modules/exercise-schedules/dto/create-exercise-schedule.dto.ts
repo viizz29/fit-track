@@ -11,7 +11,15 @@ import {
   ArrayUnique,
 } from 'class-validator';
 
-export const VALID_WEEKDAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'] as const;
+export const VALID_WEEKDAYS = [
+  'MON',
+  'TUE',
+  'WED',
+  'THU',
+  'FRI',
+  'SAT',
+  'SUN',
+] as const;
 export type Weekday = (typeof VALID_WEEKDAYS)[number];
 
 export enum RecurrenceType {
@@ -31,9 +39,10 @@ export class CreateExerciseScheduleDto {
 
   @ApiProperty({
     example: ['MON', 'WED', 'FRI'],
-    description: 'Required when recurrenceType is WEEKLY. Valid values: MON, TUE, WED, THU, FRI, SAT, SUN',
+    description:
+      'Required when recurrenceType is WEEKLY. Valid values: MON, TUE, WED, THU, FRI, SAT, SUN',
   })
-  @ValidateIf(o => o.recurrenceType === RecurrenceType.WEEKLY)
+  @ValidateIf((o) => o.recurrenceType === RecurrenceType.WEEKLY)
   @IsArray()
   @ArrayNotEmpty()
   @ArrayUnique()

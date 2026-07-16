@@ -8,7 +8,13 @@ import { ExerciseSchedulesService } from './exercise-schedules.service';
 import { ExerciseSchedulesRepository } from './exercise-schedules.repository';
 
 @Module({
-  imports: [SequelizeModule.forFeature([ExerciseSchedule, ExerciseType, ExerciseCompletion])],
+  imports: [
+    SequelizeModule.forFeature([
+      ExerciseSchedule,
+      ExerciseType,
+      ExerciseCompletion,
+    ]),
+  ],
   controllers: [ExerciseSchedulesController],
   providers: [ExerciseSchedulesService, ExerciseSchedulesRepository],
   exports: [ExerciseSchedulesRepository],

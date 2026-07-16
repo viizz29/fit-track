@@ -5,7 +5,6 @@ import { ExerciseSchedule } from '../exercise-schedules/exercise-schedule.model'
 import { ExerciseCompletion } from '../exercise-completions/exercise-completion.model';
 import { getModelToken } from '@nestjs/sequelize';
 import { MSG91 } from '../../util/send-email';
-import moment from 'moment-timezone';
 
 jest.mock('../../util/send-email', () => ({
   MSG91: {
@@ -24,8 +23,12 @@ describe('ExerciseNotificationsService', () => {
   beforeEach(async () => {
     originalEnableNotifications = process.env.ENABLE_NOTIFICATION_EMAILS;
     jest.clearAllMocks();
-    (MSG91.sendUpcomingTaskNotification as jest.Mock).mockResolvedValue(undefined);
-    (MSG91.sendMissedTaskNotification as jest.Mock).mockResolvedValue(undefined);
+    (MSG91.sendUpcomingTaskNotification as jest.Mock).mockResolvedValue(
+      undefined,
+    );
+    (MSG91.sendMissedTaskNotification as jest.Mock).mockResolvedValue(
+      undefined,
+    );
 
     exerciseScheduleModel = { findAll: jest.fn() };
     exerciseCompletionModel = { count: jest.fn() };
@@ -40,8 +43,14 @@ describe('ExerciseNotificationsService', () => {
             logNotification: jest.fn(),
           },
         },
-        { provide: getModelToken(ExerciseSchedule), useValue: exerciseScheduleModel },
-        { provide: getModelToken(ExerciseCompletion), useValue: exerciseCompletionModel },
+        {
+          provide: getModelToken(ExerciseSchedule),
+          useValue: exerciseScheduleModel,
+        },
+        {
+          provide: getModelToken(ExerciseCompletion),
+          useValue: exerciseCompletionModel,
+        },
       ],
     }).compile();
 
@@ -86,8 +95,12 @@ describe('ExerciseNotificationsService', () => {
 
       expect(exerciseScheduleModel.findAll).toHaveBeenCalledWith({
         include: expect.arrayContaining([
-          expect.objectContaining({ attributes: expect.arrayContaining(['userId', 'name', 'email']) }),
-          expect.objectContaining({ attributes: expect.arrayContaining(['id', 'name', 'description']) }),
+          expect.objectContaining({
+            attributes: expect.arrayContaining(['userId', 'name', 'email']),
+          }),
+          expect.objectContaining({
+            attributes: expect.arrayContaining(['id', 'name', 'description']),
+          }),
         ]),
         raw: true,
       });
@@ -111,7 +124,9 @@ describe('ExerciseNotificationsService', () => {
         'exerciseType.description': 'Do push-ups',
       };
       exerciseScheduleModel.findAll.mockResolvedValue([schedule]);
-      emailNotificationsService.hasNotificationBeenSent.mockResolvedValue(false);
+      emailNotificationsService.hasNotificationBeenSent.mockResolvedValue(
+        false,
+      );
 
       await service.sendExerciseNotifications();
 
@@ -171,7 +186,9 @@ describe('ExerciseNotificationsService', () => {
         'exerciseType.description': '',
       };
       exerciseScheduleModel.findAll.mockResolvedValue([schedule]);
-      emailNotificationsService.hasNotificationBeenSent.mockResolvedValue(false);
+      emailNotificationsService.hasNotificationBeenSent.mockResolvedValue(
+        false,
+      );
 
       await service.sendExerciseNotifications();
 
@@ -196,7 +213,9 @@ describe('ExerciseNotificationsService', () => {
         'exerciseType.description': '',
       };
       exerciseScheduleModel.findAll.mockResolvedValue([schedule]);
-      emailNotificationsService.hasNotificationBeenSent.mockResolvedValue(false);
+      emailNotificationsService.hasNotificationBeenSent.mockResolvedValue(
+        false,
+      );
 
       await service.sendExerciseNotifications();
 
@@ -221,7 +240,9 @@ describe('ExerciseNotificationsService', () => {
         'exerciseType.description': '',
       };
       exerciseScheduleModel.findAll.mockResolvedValue([schedule]);
-      emailNotificationsService.hasNotificationBeenSent.mockResolvedValue(false);
+      emailNotificationsService.hasNotificationBeenSent.mockResolvedValue(
+        false,
+      );
 
       await service.sendExerciseNotifications();
 
@@ -246,7 +267,9 @@ describe('ExerciseNotificationsService', () => {
         'exerciseType.description': 'Do push-ups',
       };
       exerciseScheduleModel.findAll.mockResolvedValue([schedule]);
-      emailNotificationsService.hasNotificationBeenSent.mockResolvedValue(false);
+      emailNotificationsService.hasNotificationBeenSent.mockResolvedValue(
+        false,
+      );
       exerciseCompletionModel.count.mockResolvedValue(0);
 
       await service.sendExerciseNotifications();
@@ -283,7 +306,9 @@ describe('ExerciseNotificationsService', () => {
         'exerciseType.description': '',
       };
       exerciseScheduleModel.findAll.mockResolvedValue([schedule]);
-      emailNotificationsService.hasNotificationBeenSent.mockResolvedValue(false);
+      emailNotificationsService.hasNotificationBeenSent.mockResolvedValue(
+        false,
+      );
       exerciseCompletionModel.count.mockResolvedValue(1);
 
       await service.sendExerciseNotifications();
@@ -309,7 +334,9 @@ describe('ExerciseNotificationsService', () => {
         'exerciseType.description': '',
       };
       exerciseScheduleModel.findAll.mockResolvedValue([schedule]);
-      emailNotificationsService.hasNotificationBeenSent.mockResolvedValue(false);
+      emailNotificationsService.hasNotificationBeenSent.mockResolvedValue(
+        false,
+      );
       (MSG91.sendUpcomingTaskNotification as jest.Mock).mockRejectedValue(
         new Error('Email service down'),
       );
@@ -343,7 +370,9 @@ describe('ExerciseNotificationsService', () => {
         'exerciseType.description': '',
       };
       exerciseScheduleModel.findAll.mockResolvedValue([schedule]);
-      emailNotificationsService.hasNotificationBeenSent.mockResolvedValue(false);
+      emailNotificationsService.hasNotificationBeenSent.mockResolvedValue(
+        false,
+      );
       exerciseCompletionModel.count.mockResolvedValue(0);
       (MSG91.sendMissedTaskNotification as jest.Mock).mockRejectedValue(
         new Error('Email service down'),
@@ -387,8 +416,13 @@ describe('ExerciseNotificationsService', () => {
         startDatetime: in5Min.toISOString(),
       };
 
-      exerciseScheduleModel.findAll.mockResolvedValue([badSchedule, goodSchedule]);
-      emailNotificationsService.hasNotificationBeenSent.mockResolvedValue(false);
+      exerciseScheduleModel.findAll.mockResolvedValue([
+        badSchedule,
+        goodSchedule,
+      ]);
+      emailNotificationsService.hasNotificationBeenSent.mockResolvedValue(
+        false,
+      );
 
       await service.sendExerciseNotifications();
 
@@ -417,7 +451,9 @@ describe('ExerciseNotificationsService', () => {
         'exerciseType.description': '',
       };
       exerciseScheduleModel.findAll.mockResolvedValue([schedule]);
-      emailNotificationsService.hasNotificationBeenSent.mockResolvedValue(false);
+      emailNotificationsService.hasNotificationBeenSent.mockResolvedValue(
+        false,
+      );
 
       await service.sendExerciseNotifications();
 
@@ -445,7 +481,9 @@ describe('ExerciseNotificationsService', () => {
         'exerciseType.description': '',
       };
       exerciseScheduleModel.findAll.mockResolvedValue([schedule]);
-      emailNotificationsService.hasNotificationBeenSent.mockResolvedValue(false);
+      emailNotificationsService.hasNotificationBeenSent.mockResolvedValue(
+        false,
+      );
 
       await service.sendExerciseNotifications();
 

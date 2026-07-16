@@ -26,7 +26,9 @@ describe('ExerciseSchedulesService', () => {
     }).compile();
 
     service = module.get<ExerciseSchedulesService>(ExerciseSchedulesService);
-    repository = module.get<ExerciseSchedulesRepository>(ExerciseSchedulesRepository);
+    repository = module.get<ExerciseSchedulesRepository>(
+      ExerciseSchedulesRepository,
+    );
     jest.resetAllMocks();
   });
 
@@ -43,7 +45,11 @@ describe('ExerciseSchedulesService', () => {
         timezone: 'America/New_York',
       };
       const userId = 'user-1';
-      mockRepository.create.mockResolvedValue({ id: 'sched-1', ...dto, startDatetime: '2026-07-01T08:00:00.000Z' });
+      mockRepository.create.mockResolvedValue({
+        id: 'sched-1',
+        ...dto,
+        startDatetime: '2026-07-01T08:00:00.000Z',
+      });
 
       const result = await service.create(dto, userId);
 
@@ -94,7 +100,10 @@ describe('ExerciseSchedulesService', () => {
 
       const result = await service.findByDate('user-1', query);
 
-      expect(repository.findByDate).toHaveBeenCalledWith('user-1', '2026-07-01');
+      expect(repository.findByDate).toHaveBeenCalledWith(
+        'user-1',
+        '2026-07-01',
+      );
       expect(result).toEqual(resultData);
     });
   });
@@ -102,7 +111,7 @@ describe('ExerciseSchedulesService', () => {
   describe('findOne', () => {
     it('should return a schedule when found and owned by user', async () => {
       mockRepository.findById.mockResolvedValue({
-        get: (key: string) => key === 'userId' ? 'user-1' : null,
+        get: (key: string) => (key === 'userId' ? 'user-1' : null),
         id: 'sched-1',
       });
 
@@ -115,28 +124,38 @@ describe('ExerciseSchedulesService', () => {
     it('should throw NotFoundException when schedule not found', async () => {
       mockRepository.findById.mockResolvedValue(null);
 
-      await expect(service.findOne('sched-1', 'user-1')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('sched-1', 'user-1')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw NotFoundException when schedule belongs to another user', async () => {
       mockRepository.findById.mockResolvedValue({
-        get: (key: string) => key === 'userId' ? 'user-2' : null,
+        get: (key: string) => (key === 'userId' ? 'user-2' : null),
         id: 'sched-1',
       });
 
-      await expect(service.findOne('sched-1', 'user-1')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('sched-1', 'user-1')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
   describe('update', () => {
     it('should update and return the schedule', async () => {
       mockRepository.findById
-        .mockResolvedValueOnce({ get: (key: string) => key === 'userId' ? 'user-1' : null, id: 'sched-1' })
+        .mockResolvedValueOnce({
+          get: (key: string) => (key === 'userId' ? 'user-1' : null),
+          id: 'sched-1',
+        })
         .mockResolvedValueOnce({ id: 'sched-1', recurrenceType: 'DAILY' })
         .mockResolvedValueOnce({ id: 'sched-1', recurrenceType: 'DAILY' })
         .mockResolvedValueOnce({ id: 'sched-1', recurrenceType: 'WEEKLY' });
       mockRepository.update.mockResolvedValue([1, []]);
-      const dto = { recurrenceType: RecurrenceType.WEEKLY, weekdays: ['MON', 'WED'] };
+      const dto = {
+        recurrenceType: RecurrenceType.WEEKLY,
+        weekdays: ['MON', 'WED'],
+      };
 
       const result = await service.update('sched-1', dto, 'user-1');
 
@@ -148,7 +167,7 @@ describe('ExerciseSchedulesService', () => {
   describe('remove', () => {
     it('should remove the schedule if found and owned by user', async () => {
       mockRepository.findById.mockResolvedValue({
-        get: (key: string) => key === 'userId' ? 'user-1' : null,
+        get: (key: string) => (key === 'userId' ? 'user-1' : null),
         id: 'sched-1',
       });
       mockRepository.remove.mockResolvedValue(undefined);
@@ -161,7 +180,9 @@ describe('ExerciseSchedulesService', () => {
     it('should throw NotFoundException when schedule not found', async () => {
       mockRepository.findById.mockResolvedValue(null);
 
-      await expect(service.remove('sched-1', 'user-1')).rejects.toThrow(NotFoundException);
+      await expect(service.remove('sched-1', 'user-1')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });

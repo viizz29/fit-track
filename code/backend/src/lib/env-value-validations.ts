@@ -17,8 +17,6 @@ export default Joi.object({
   DB_USERNAME: Joi.string().required(),
   SOCKETIO_ENDPOINT_ON: Joi.boolean().default(false),
 
-  MSG91_AUTH_KEY: Joi.string().default(null),
-  MAILING_DOMAIN_FOR_MSG91: Joi.string().default(null),
   API_BASE_URL: Joi.string().default(''),
   SOCKETIO_ENDPOINT: Joi.string().default(''),
   PUBLIC_HOST_WITH_PORT: Joi.string().default(
@@ -31,4 +29,12 @@ export default Joi.object({
   TTS_API: Joi.string().default(`http://localhost:3536/tts/api/speak`),
   ENABLE_NOTIFICATION_EMAILS: Joi.boolean().default(false),
   SCHEDULED_TASKS_ENABLED: Joi.boolean().default(false),
+
+  SMTP_HOST: Joi.string().required(),
+  SMTP_PORT: Joi.number().integer().required(),
+  SMTP_SECURE: Joi.boolean().required(),
+  SMTP_USERNAME: Joi.string().required(),
+  SMTP_PASSWORD: Joi.string().required(),
+  MAIL_FROM_ADDRESS: Joi.string().email().required(),
+  MAIL_FROM_NAME: Joi.string().required(),
 });

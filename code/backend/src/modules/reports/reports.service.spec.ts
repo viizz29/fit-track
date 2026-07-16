@@ -17,7 +17,10 @@ describe('ReportsService', () => {
       providers: [
         ReportsService,
         { provide: getModelToken(ExerciseSchedule), useValue: scheduleModel },
-        { provide: getModelToken(ExerciseCompletion), useValue: completionModel },
+        {
+          provide: getModelToken(ExerciseCompletion),
+          useValue: completionModel,
+        },
       ],
     }).compile();
 
@@ -52,7 +55,12 @@ describe('ReportsService', () => {
     it('should accept custom period', async () => {
       completionModel.findAll.mockResolvedValue([]);
 
-      await service.getCompletions('user-1', '2024-01-01', '2024-01-31', 'week');
+      await service.getCompletions(
+        'user-1',
+        '2024-01-01',
+        '2024-01-31',
+        'week',
+      );
 
       expect(completionModel.findAll).toHaveBeenCalledWith(
         expect.objectContaining({

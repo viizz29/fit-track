@@ -23,6 +23,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import envValueValidations from 'src/lib/env-value-validations';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { HealthModule } from '../health/health.module';
+import { MailModule } from '../mail/mail.module';
 
 const imports = [
   ConfigModule.forRoot({
@@ -39,6 +40,7 @@ const imports = [
   ReportsModule,
   ExerciseStatsModule,
   ExerciseNotificationsModule,
+  MailModule,
   SequelizeModule.forRootAsync({
     imports: [ConfigModule],
     inject: [ConfigService],

@@ -140,10 +140,10 @@ describe('UsersService', () => {
 
       const result = await service.update('user-123', { name: 'Jane' });
 
-      expect(userRepository.update).toHaveBeenCalledWith('user-123', { name: 'Jane' });
-      expect(result).toEqual(
-        expect.objectContaining({ name: 'Jane' }),
-      );
+      expect(userRepository.update).toHaveBeenCalledWith('user-123', {
+        name: 'Jane',
+      });
+      expect(result).toEqual(expect.objectContaining({ name: 'Jane' }));
     });
 
     it('should throw NotFoundException if user not found', async () => {
@@ -206,9 +206,9 @@ describe('UsersService', () => {
     it('should throw NotFoundException if user not found', async () => {
       userRepository.findById.mockResolvedValue(null);
 
-      await expect(
-        service.getEmailPreferences('nonexistent'),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.getEmailPreferences('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -231,7 +231,9 @@ describe('UsersService', () => {
       userRepository.findById.mockResolvedValue(null);
 
       await expect(
-        service.updateEmailPreferences('nonexistent', { emailNotifications: true }),
+        service.updateEmailPreferences('nonexistent', {
+          emailNotifications: true,
+        }),
       ).rejects.toThrow(NotFoundException);
     });
   });

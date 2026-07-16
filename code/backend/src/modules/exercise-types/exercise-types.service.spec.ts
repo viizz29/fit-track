@@ -36,21 +36,34 @@ describe('ExerciseTypesService', () => {
   describe('create', () => {
     it('should create an exercise type when name is unique for user', async () => {
       mockRepository.findByName.mockResolvedValue(null);
-      mockRepository.create.mockResolvedValue({ id: 'type-1', name: 'Running', userId: 'user-1' });
+      mockRepository.create.mockResolvedValue({
+        id: 'type-1',
+        name: 'Running',
+        userId: 'user-1',
+      });
 
       const dto = { name: 'Running', description: 'Outdoor running' };
       const result = await service.create(dto, 'user-1');
 
       expect(repository.findByName).toHaveBeenCalledWith('Running', 'user-1');
       expect(repository.create).toHaveBeenCalledWith(dto, 'user-1');
-      expect(result).toEqual({ id: 'type-1', name: 'Running', userId: 'user-1' });
+      expect(result).toEqual({
+        id: 'type-1',
+        name: 'Running',
+        userId: 'user-1',
+      });
     });
 
     it('should throw ConflictException when name already exists for user', async () => {
-      mockRepository.findByName.mockResolvedValue({ id: 'existing', name: 'Running' });
+      mockRepository.findByName.mockResolvedValue({
+        id: 'existing',
+        name: 'Running',
+      });
 
       const dto = { name: 'Running', description: 'Duplicate' };
-      await expect(service.create(dto, 'user-1')).rejects.toThrow(ConflictException);
+      await expect(service.create(dto, 'user-1')).rejects.toThrow(
+        ConflictException,
+      );
 
       expect(repository.create).not.toHaveBeenCalled();
     });
@@ -87,7 +100,9 @@ describe('ExerciseTypesService', () => {
     it('should throw NotFoundException when exercise type not found', async () => {
       mockRepository.findById.mockResolvedValue(null);
 
-      await expect(service.findOne('type-1', 'user-1')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('type-1', 'user-1')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw NotFoundException when exercise type belongs to another user', async () => {
@@ -97,7 +112,9 @@ describe('ExerciseTypesService', () => {
         name: 'Running',
       });
 
-      await expect(service.findOne('type-1', 'user-1')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('type-1', 'user-1')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -135,7 +152,9 @@ describe('ExerciseTypesService', () => {
     it('should throw NotFoundException when exercise type not found', async () => {
       mockRepository.findById.mockResolvedValue(null);
 
-      await expect(service.remove('type-1', 'user-1')).rejects.toThrow(NotFoundException);
+      await expect(service.remove('type-1', 'user-1')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });

@@ -40,7 +40,8 @@ export class ExerciseSchedulesController {
 
   @Get('week')
   @ApiOperation({
-    summary: 'Get all exercises scheduled for a week grouped by day. Defaults to current week if no date provided.',
+    summary:
+      'Get all exercises scheduled for a week grouped by day. Defaults to current week if no date provided.',
   })
   getWeek(
     @CurrentUser() user: { userId: string },

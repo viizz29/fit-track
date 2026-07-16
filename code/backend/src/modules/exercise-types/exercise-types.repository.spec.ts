@@ -61,7 +61,10 @@ describe('ExerciseTypesRepository', () => {
 
       const result = await repository.create(dto, 'user-1');
 
-      expect(mockModel.create).toHaveBeenCalledWith({ ...dto, userId: 'user-1' });
+      expect(mockModel.create).toHaveBeenCalledWith({
+        ...dto,
+        userId: 'user-1',
+      });
       expect(result).toEqual(expected);
     });
   });
@@ -78,7 +81,14 @@ describe('ExerciseTypesRepository', () => {
 
       expect(mockModel.findAll).toHaveBeenCalledWith({
         where: { userId: 'user-1' },
-        attributes: ['id', 'userId', 'name', 'description', 'created_at', 'updated_at'],
+        attributes: [
+          'id',
+          'userId',
+          'name',
+          'description',
+          'created_at',
+          'updated_at',
+        ],
       });
       expect(result).toEqual(types);
     });
@@ -106,7 +116,10 @@ describe('ExerciseTypesRepository', () => {
   describe('update', () => {
     it('should update an exercise type and return affected count and rows', async () => {
       const attrs = { name: 'Jogging' };
-      mockModel.update.mockResolvedValue([1, [{ id: 'type-1', name: 'Jogging' }]]);
+      mockModel.update.mockResolvedValue([
+        1,
+        [{ id: 'type-1', name: 'Jogging' }],
+      ]);
 
       const result = await repository.update('type-1', attrs);
 

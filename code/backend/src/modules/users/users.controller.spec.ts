@@ -33,7 +33,11 @@ describe('UsersController', () => {
   describe('getProfile', () => {
     it('should return user profile by userId', async () => {
       const user = { userId: 'user-123' };
-      const expected = { userId: 'user-123', name: 'John', email: 'john@test.com' };
+      const expected = {
+        userId: 'user-123',
+        name: 'John',
+        email: 'john@test.com',
+      };
       usersService.findById.mockResolvedValue(expected as any);
 
       const result = await controller.getProfile(user);
@@ -47,7 +51,11 @@ describe('UsersController', () => {
     it('should update user profile', async () => {
       const user = { userId: 'user-123' };
       const dto = { name: 'Jane', email: 'jane@test.com' };
-      const expected = { userId: 'user-123', name: 'Jane', email: 'jane@test.com' };
+      const expected = {
+        userId: 'user-123',
+        name: 'Jane',
+        email: 'jane@test.com',
+      };
       usersService.update.mockResolvedValue(expected as any);
 
       const result = await controller.updateProfile(dto, user);
@@ -79,7 +87,10 @@ describe('UsersController', () => {
 
       const result = await controller.updateEmailPreferences(dto, user);
 
-      expect(usersService.updateEmailPreferences).toHaveBeenCalledWith('user-123', dto);
+      expect(usersService.updateEmailPreferences).toHaveBeenCalledWith(
+        'user-123',
+        dto,
+      );
       expect(result).toEqual(expected);
     });
   });

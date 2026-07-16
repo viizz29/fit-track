@@ -7,7 +7,13 @@ import { ReportsController } from './reports.controller';
 import { ReportsService } from './reports.service';
 
 @Module({
-  imports: [SequelizeModule.forFeature([ExerciseSchedule, ExerciseCompletion, ExerciseType])],
+  imports: [
+    SequelizeModule.forFeature([
+      ExerciseSchedule,
+      ExerciseCompletion,
+      ExerciseType,
+    ]),
+  ],
   controllers: [ReportsController],
   providers: [ReportsService],
 })

@@ -10,10 +10,7 @@ export class ExerciseTypesRepository {
     private exerciseTypeModel: typeof ExerciseType,
   ) {}
 
-  async findByName(
-    name: string,
-    userId: string,
-  ): Promise<ExerciseType | null> {
+  async findByName(name: string, userId: string): Promise<ExerciseType | null> {
     return this.exerciseTypeModel.findOne({
       where: { name, userId },
     });

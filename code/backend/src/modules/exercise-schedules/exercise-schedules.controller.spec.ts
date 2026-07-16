@@ -23,12 +23,12 @@ describe('ExerciseSchedulesController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ExerciseSchedulesController],
-      providers: [
-        { provide: ExerciseSchedulesService, useValue: mockService },
-      ],
+      providers: [{ provide: ExerciseSchedulesService, useValue: mockService }],
     }).compile();
 
-    controller = module.get<ExerciseSchedulesController>(ExerciseSchedulesController);
+    controller = module.get<ExerciseSchedulesController>(
+      ExerciseSchedulesController,
+    );
     service = module.get<ExerciseSchedulesService>(ExerciseSchedulesService);
     jest.clearAllMocks();
   });

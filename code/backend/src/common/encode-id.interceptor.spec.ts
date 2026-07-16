@@ -19,19 +19,23 @@ describe('EncodeIdInterceptor', () => {
   it('should transform snake_case keys to camelCase', (done) => {
     const data = { user_id: '123', user_name: 'John' };
 
-    interceptor.intercept(mockContext, callHandler(data)).subscribe((result) => {
-      expect(result).toEqual({ userId: '123', userName: 'John' });
-      done();
-    });
+    interceptor
+      .intercept(mockContext, callHandler(data))
+      .subscribe((result) => {
+        expect(result).toEqual({ userId: '123', userName: 'John' });
+        done();
+      });
   });
 
   it('should transform kebab-case keys to camelCase', (done) => {
     const data = { 'first-name': 'John', 'last-name': 'Doe' };
 
-    interceptor.intercept(mockContext, callHandler(data)).subscribe((result) => {
-      expect(result).toEqual({ firstName: 'John', lastName: 'Doe' });
-      done();
-    });
+    interceptor
+      .intercept(mockContext, callHandler(data))
+      .subscribe((result) => {
+        expect(result).toEqual({ firstName: 'John', lastName: 'Doe' });
+        done();
+      });
   });
 
   it('should handle nested objects', (done) => {
@@ -40,13 +44,15 @@ describe('EncodeIdInterceptor', () => {
       profile: { first_name: 'John', created_at: '2024-01-01' },
     };
 
-    interceptor.intercept(mockContext, callHandler(data)).subscribe((result) => {
-      expect(result).toEqual({
-        userId: '123',
-        profile: { firstName: 'John', createdAt: '2024-01-01' },
+    interceptor
+      .intercept(mockContext, callHandler(data))
+      .subscribe((result) => {
+        expect(result).toEqual({
+          userId: '123',
+          profile: { firstName: 'John', createdAt: '2024-01-01' },
+        });
+        done();
       });
-      done();
-    });
   });
 
   it('should handle arrays', (done) => {
@@ -55,13 +61,15 @@ describe('EncodeIdInterceptor', () => {
       { user_id: '2', is_active: false },
     ];
 
-    interceptor.intercept(mockContext, callHandler(data)).subscribe((result) => {
-      expect(result).toEqual([
-        { userId: '1', isActive: true },
-        { userId: '2', isActive: false },
-      ]);
-      done();
-    });
+    interceptor
+      .intercept(mockContext, callHandler(data))
+      .subscribe((result) => {
+        expect(result).toEqual([
+          { userId: '1', isActive: true },
+          { userId: '2', isActive: false },
+        ]);
+        done();
+      });
   });
 
   it('should handle arrays of nested objects', (done) => {
@@ -72,36 +80,44 @@ describe('EncodeIdInterceptor', () => {
       },
     ];
 
-    interceptor.intercept(mockContext, callHandler(data)).subscribe((result) => {
-      expect(result).toEqual([
-        {
-          exerciseId: 'e1',
-          exerciseSchedule: { recurrenceType: 'daily' },
-        },
-      ]);
-      done();
-    });
+    interceptor
+      .intercept(mockContext, callHandler(data))
+      .subscribe((result) => {
+        expect(result).toEqual([
+          {
+            exerciseId: 'e1',
+            exerciseSchedule: { recurrenceType: 'daily' },
+          },
+        ]);
+        done();
+      });
   });
 
   it('should return null as-is', (done) => {
-    interceptor.intercept(mockContext, callHandler(null)).subscribe((result) => {
-      expect(result).toBeNull();
-      done();
-    });
+    interceptor
+      .intercept(mockContext, callHandler(null))
+      .subscribe((result) => {
+        expect(result).toBeNull();
+        done();
+      });
   });
 
   it('should return undefined as-is', (done) => {
-    interceptor.intercept(mockContext, callHandler(undefined)).subscribe((result) => {
-      expect(result).toBeUndefined();
-      done();
-    });
+    interceptor
+      .intercept(mockContext, callHandler(undefined))
+      .subscribe((result) => {
+        expect(result).toBeUndefined();
+        done();
+      });
   });
 
   it('should return primitives as-is', (done) => {
-    interceptor.intercept(mockContext, callHandler('hello')).subscribe((result) => {
-      expect(result).toBe('hello');
-      done();
-    });
+    interceptor
+      .intercept(mockContext, callHandler('hello'))
+      .subscribe((result) => {
+        expect(result).toBe('hello');
+        done();
+      });
   });
 
   it('should handle Sequelize model instances via toJSON()', (done) => {
@@ -109,21 +125,25 @@ describe('EncodeIdInterceptor', () => {
       toJSON: jest.fn().mockReturnValue({ user_id: '123', is_active: true }),
     };
 
-    interceptor.intercept(mockContext, callHandler(sequelizeInstance)).subscribe((result) => {
-      expect(sequelizeInstance.toJSON).toHaveBeenCalled();
-      expect(result).toEqual({ userId: '123', isActive: true });
-      done();
-    });
+    interceptor
+      .intercept(mockContext, callHandler(sequelizeInstance))
+      .subscribe((result) => {
+        expect(sequelizeInstance.toJSON).toHaveBeenCalled();
+        expect(result).toEqual({ userId: '123', isActive: true });
+        done();
+      });
   });
 
   it('should skip transform when transform property is false', (done) => {
     const data = { user_id: '123', transform: false };
 
-    interceptor.intercept(mockContext, callHandler(data)).subscribe((result) => {
-      expect(result).toEqual({ user_id: '123' });
-      expect(result).not.toHaveProperty('transform');
-      done();
-    });
+    interceptor
+      .intercept(mockContext, callHandler(data))
+      .subscribe((result) => {
+        expect(result).toEqual({ user_id: '123' });
+        expect(result).not.toHaveProperty('transform');
+        done();
+      });
   });
 
   it('should transform deeply nested arrays in objects', (done) => {
@@ -134,15 +154,17 @@ describe('EncodeIdInterceptor', () => {
       ],
     };
 
-    interceptor.intercept(mockContext, callHandler(data)).subscribe((result) => {
-      expect(result).toEqual({
-        exerciseList: [
-          { exerciseId: '1', createdAt: '2024-01-01' },
-          { exerciseId: '2', createdAt: '2024-01-02' },
-        ],
+    interceptor
+      .intercept(mockContext, callHandler(data))
+      .subscribe((result) => {
+        expect(result).toEqual({
+          exerciseList: [
+            { exerciseId: '1', createdAt: '2024-01-01' },
+            { exerciseId: '2', createdAt: '2024-01-02' },
+          ],
+        });
+        done();
       });
-      done();
-    });
   });
 
   it('should handle empty objects', (done) => {

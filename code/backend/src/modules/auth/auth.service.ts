@@ -10,7 +10,8 @@ import * as crypto from 'crypto';
 import { UserRepository } from '../users/users.repository';
 import { PasswordResetTokenRepository } from './password-reset-token.repository';
 import { UserOtpRepository } from './user-otp.repository';
-import { MSG91 } from 'src/util/send-email';
+import { MailService } from '../mail/mail.service';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -18,6 +19,7 @@ export class AuthService {
     private jwtService: JwtService,
     private passwordResetTokenRepository: PasswordResetTokenRepository,
     private userOtpRepository: UserOtpRepository,
+    private readonly mailService: MailService,
   ) {}
 
   async register(name: string, email: string, password: string) {
@@ -45,7 +47,11 @@ export class AuthService {
     });
 
     try {
-      await MSG91.sendVerificationEmail(name, email, verificationToken);
+      await this.mailService.sendVerificationEmail(
+        name,
+        email,
+        verificationToken,
+      );
     } catch (err) {
       console.error('Failed to send verification email:', err);
     }
@@ -107,7 +113,7 @@ export class AuthService {
     });
 
     try {
-      await MSG91.sendVerificationEmail(
+      await this.mailService.sendVerificationEmail(
         user.name,
         user.email,
         verificationToken,
@@ -143,7 +149,11 @@ export class AuthService {
       });
 
       try {
-        await MSG91.sendPasswordResetEmail(user.name, user.email, token);
+        await this.mailService.sendPasswordResetEmail(
+          user.name,
+          user.email,
+          token,
+        );
       } catch (err) {
         console.error('Failed to send password reset email:', err);
       }
@@ -226,7 +236,7 @@ export class AuthService {
     });
 
     try {
-      await MSG91.sendOtpThroughEmail(user.name, user.email, otp);
+      await this.mailService.sendOtp(user.email, user.name, otp);
     } catch (err) {
       console.error('Failed to send OTP email:', err);
     }

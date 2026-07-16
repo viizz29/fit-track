@@ -53,10 +53,7 @@ export class UsersService {
     return { emailNotifications: user.isEmailNotificationsEnabled };
   }
 
-  async updateEmailPreferences(
-    userId: string,
-    dto: UpdateEmailPreferencesDto,
-  ) {
+  async updateEmailPreferences(userId: string, dto: UpdateEmailPreferencesDto) {
     const user = await this.userRepository.findById(userId);
     if (!user) {
       throw new NotFoundException('User not found');

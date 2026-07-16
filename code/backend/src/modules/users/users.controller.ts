@@ -41,7 +41,10 @@ export class UsersController {
   @SkipEmailVerification()
   @Get('me/email-preferences')
   @ApiOperation({ summary: 'Get email notification preferences' })
-  @ApiResponse({ status: 200, description: 'Returns email notification preference' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns email notification preference',
+  })
   getEmailPreferences(@CurrentUser() user: { userId: string }) {
     return this.usersService.getEmailPreferences(user.userId);
   }

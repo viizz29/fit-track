@@ -24,12 +24,20 @@ describe('ExerciseSchedulesRepository', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ExerciseSchedulesRepository,
-        { provide: getModelToken(ExerciseSchedule), useValue: mockScheduleModel },
-        { provide: getModelToken(ExerciseCompletion), useValue: mockCompletionModel },
+        {
+          provide: getModelToken(ExerciseSchedule),
+          useValue: mockScheduleModel,
+        },
+        {
+          provide: getModelToken(ExerciseCompletion),
+          useValue: mockCompletionModel,
+        },
       ],
     }).compile();
 
-    repository = module.get<ExerciseSchedulesRepository>(ExerciseSchedulesRepository);
+    repository = module.get<ExerciseSchedulesRepository>(
+      ExerciseSchedulesRepository,
+    );
     exerciseScheduleModel = module.get(getModelToken(ExerciseSchedule));
     exerciseCompletionModel = module.get(getModelToken(ExerciseCompletion));
     jest.clearAllMocks();
@@ -119,7 +127,12 @@ describe('ExerciseSchedulesRepository', () => {
     });
 
     it('should include a DAILY schedule that falls on the target date', async () => {
-      const schedule = makeSchedule('sched-1', 'DAILY', null, '2026-06-30T08:00:00.000Z');
+      const schedule = makeSchedule(
+        'sched-1',
+        'DAILY',
+        null,
+        '2026-06-30T08:00:00.000Z',
+      );
       mockScheduleModel.findAll.mockResolvedValue([schedule]);
       mockCompletionModel.findAll.mockResolvedValue([]);
 
@@ -131,7 +144,12 @@ describe('ExerciseSchedulesRepository', () => {
     });
 
     it('should include a DAILY schedule every day from start date', async () => {
-      const schedule = makeSchedule('sched-1', 'DAILY', null, '2026-06-01T08:00:00.000Z');
+      const schedule = makeSchedule(
+        'sched-1',
+        'DAILY',
+        null,
+        '2026-06-01T08:00:00.000Z',
+      );
       mockScheduleModel.findAll.mockResolvedValue([schedule]);
       mockCompletionModel.findAll.mockResolvedValue([]);
 
@@ -141,7 +159,12 @@ describe('ExerciseSchedulesRepository', () => {
     });
 
     it('should include a WEEKLY schedule on a matching weekday', async () => {
-      const schedule = makeSchedule('sched-1', 'WEEKLY', ['WED'], '2026-06-22T08:00:00.000Z');
+      const schedule = makeSchedule(
+        'sched-1',
+        'WEEKLY',
+        ['WED'],
+        '2026-06-22T08:00:00.000Z',
+      );
       mockScheduleModel.findAll.mockResolvedValue([schedule]);
       mockCompletionModel.findAll.mockResolvedValue([]);
 
@@ -152,7 +175,12 @@ describe('ExerciseSchedulesRepository', () => {
     });
 
     it('should exclude a WEEKLY schedule on a non-matching weekday', async () => {
-      const schedule = makeSchedule('sched-1', 'WEEKLY', ['MON', 'FRI'], '2026-06-22T08:00:00.000Z');
+      const schedule = makeSchedule(
+        'sched-1',
+        'WEEKLY',
+        ['MON', 'FRI'],
+        '2026-06-22T08:00:00.000Z',
+      );
       mockScheduleModel.findAll.mockResolvedValue([schedule]);
       mockCompletionModel.findAll.mockResolvedValue([]);
 
@@ -162,7 +190,12 @@ describe('ExerciseSchedulesRepository', () => {
     });
 
     it('should exclude a schedule whose start date is after the target date', async () => {
-      const schedule = makeSchedule('sched-1', 'DAILY', null, '2026-07-10T08:00:00.000Z');
+      const schedule = makeSchedule(
+        'sched-1',
+        'DAILY',
+        null,
+        '2026-07-10T08:00:00.000Z',
+      );
       mockScheduleModel.findAll.mockResolvedValue([schedule]);
       mockCompletionModel.findAll.mockResolvedValue([]);
 
@@ -172,10 +205,18 @@ describe('ExerciseSchedulesRepository', () => {
     });
 
     it('should exclude a schedule that is already completed for the day', async () => {
-      const schedule = makeSchedule('sched-1', 'DAILY', null, '2026-06-30T08:00:00.000Z');
+      const schedule = makeSchedule(
+        'sched-1',
+        'DAILY',
+        null,
+        '2026-06-30T08:00:00.000Z',
+      );
       mockScheduleModel.findAll.mockResolvedValue([schedule]);
       mockCompletionModel.findAll.mockResolvedValue([
-        { scheduleId: 'sched-1', completionDatetime: new Date('2026-07-01T10:00:00Z') },
+        {
+          scheduleId: 'sched-1',
+          completionDatetime: new Date('2026-07-01T10:00:00Z'),
+        },
       ]);
 
       const result = await repository.findByDate('user-1', '2026-07-01');
@@ -185,8 +226,18 @@ describe('ExerciseSchedulesRepository', () => {
     });
 
     it('should handle mixed DAILY and WEEKLY schedules', async () => {
-      const daily = makeSchedule('sched-d', 'DAILY', null, '2026-06-01T08:00:00.000Z');
-      const weekly = makeSchedule('sched-w', 'WEEKLY', ['WED'], '2026-06-22T08:00:00.000Z');
+      const daily = makeSchedule(
+        'sched-d',
+        'DAILY',
+        null,
+        '2026-06-01T08:00:00.000Z',
+      );
+      const weekly = makeSchedule(
+        'sched-w',
+        'WEEKLY',
+        ['WED'],
+        '2026-06-22T08:00:00.000Z',
+      );
       mockScheduleModel.findAll.mockResolvedValue([daily, weekly]);
       mockCompletionModel.findAll.mockResolvedValue([]);
 

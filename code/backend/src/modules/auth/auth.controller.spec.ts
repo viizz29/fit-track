@@ -42,13 +42,24 @@ describe('AuthController', () => {
 
   describe('register', () => {
     it('should call authService.register with correct args', async () => {
-      const dto = { name: 'John', email: 'john@test.com', password: 'pass1234' };
-      const expected = { message: 'Account created successfully. Please check your email to verify your account.' };
+      const dto = {
+        name: 'John',
+        email: 'john@test.com',
+        password: 'pass1234',
+      };
+      const expected = {
+        message:
+          'Account created successfully. Please check your email to verify your account.',
+      };
       authService.register.mockResolvedValue(expected);
 
       const result = await controller.register(dto);
 
-      expect(authService.register).toHaveBeenCalledWith('John', 'john@test.com', 'pass1234');
+      expect(authService.register).toHaveBeenCalledWith(
+        'John',
+        'john@test.com',
+        'pass1234',
+      );
       expect(result).toEqual(expected);
     });
   });
@@ -56,7 +67,9 @@ describe('AuthController', () => {
   describe('verifyEmail', () => {
     it('should call authService.verifyEmail with token', async () => {
       const dto = { token: 'abc123' };
-      const expected = { message: 'Email verified successfully. You can now log in.' };
+      const expected = {
+        message: 'Email verified successfully. You can now log in.',
+      };
       authService.verifyEmail.mockResolvedValue(expected);
 
       const result = await controller.verifyEmail(dto);
@@ -69,12 +82,17 @@ describe('AuthController', () => {
   describe('resendVerification', () => {
     it('should call authService.resendVerification with email', async () => {
       const dto = { email: 'john@test.com' };
-      const expected = { message: 'Verification email resent successfully. Please check your email.' };
+      const expected = {
+        message:
+          'Verification email resent successfully. Please check your email.',
+      };
       authService.resendVerification.mockResolvedValue(expected);
 
       const result = await controller.resendVerification(dto);
 
-      expect(authService.resendVerification).toHaveBeenCalledWith('john@test.com');
+      expect(authService.resendVerification).toHaveBeenCalledWith(
+        'john@test.com',
+      );
       expect(result).toEqual(expected);
     });
   });
@@ -82,7 +100,10 @@ describe('AuthController', () => {
   describe('forgotPassword', () => {
     it('should call authService.forgotPassword with email', async () => {
       const dto = { email: 'john@test.com' };
-      const expected = { message: 'If an account with that email exists, a password reset link has been sent.' };
+      const expected = {
+        message:
+          'If an account with that email exists, a password reset link has been sent.',
+      };
       authService.forgotPassword.mockResolvedValue(expected);
 
       const result = await controller.forgotPassword(dto);
@@ -100,7 +121,10 @@ describe('AuthController', () => {
 
       const result = await controller.resetPassword(dto);
 
-      expect(authService.resetPassword).toHaveBeenCalledWith('reset-token', 'newpass123');
+      expect(authService.resetPassword).toHaveBeenCalledWith(
+        'reset-token',
+        'newpass123',
+      );
       expect(result).toEqual(expected);
     });
   });
@@ -108,12 +132,18 @@ describe('AuthController', () => {
   describe('login', () => {
     it('should call authService.login with email and password', async () => {
       const dto = { email: 'john@test.com', password: 'pass1234' };
-      const expected = { token: 'jwt-token', user: { userId: '1', name: 'John', email: 'john@test.com' } };
+      const expected = {
+        token: 'jwt-token',
+        user: { userId: '1', name: 'John', email: 'john@test.com' },
+      };
       authService.login.mockResolvedValue(expected);
 
       const result = await controller.login(dto);
 
-      expect(authService.login).toHaveBeenCalledWith('john@test.com', 'pass1234');
+      expect(authService.login).toHaveBeenCalledWith(
+        'john@test.com',
+        'pass1234',
+      );
       expect(result).toEqual(expected);
     });
 
@@ -121,19 +151,27 @@ describe('AuthController', () => {
       const dto = { email: 'john@test.com', password: 'wrong' };
       authService.login.mockRejectedValue(new Error('Invalid credentials'));
 
-      await expect(controller.login(dto)).rejects.toThrow('Invalid credentials');
+      await expect(controller.login(dto)).rejects.toThrow(
+        'Invalid credentials',
+      );
     });
   });
 
   describe('verifyOtpLogin', () => {
     it('should call authService.verifyOtpLogin with tempToken and otp', async () => {
       const dto = { tempToken: 'temp-jwt', otp: '123456' };
-      const expected = { token: 'jwt-token', user: { userId: '1', name: 'John', email: 'john@test.com' } };
+      const expected = {
+        token: 'jwt-token',
+        user: { userId: '1', name: 'John', email: 'john@test.com' },
+      };
       authService.verifyOtpLogin.mockResolvedValue(expected);
 
       const result = await controller.verifyOtpLogin(dto);
 
-      expect(authService.verifyOtpLogin).toHaveBeenCalledWith('temp-jwt', '123456');
+      expect(authService.verifyOtpLogin).toHaveBeenCalledWith(
+        'temp-jwt',
+        '123456',
+      );
       expect(result).toEqual(expected);
     });
   });

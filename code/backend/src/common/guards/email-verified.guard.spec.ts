@@ -44,7 +44,9 @@ describe('EmailVerifiedGuard', () => {
   it('should allow access for verified users', () => {
     reflector.getAllAndOverride.mockReturnValue(undefined);
 
-    expect(guard.canActivate(mockContext({ isEmailVerified: true }))).toBe(true);
+    expect(guard.canActivate(mockContext({ isEmailVerified: true }))).toBe(
+      true,
+    );
   });
 
   it('should throw ForbiddenException for unverified users', () => {

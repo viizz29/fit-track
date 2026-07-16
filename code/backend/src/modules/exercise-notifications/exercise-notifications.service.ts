@@ -8,7 +8,7 @@ import { ExerciseType } from '../exercise-types/exercise-type.model';
 import { ExerciseCompletion } from '../exercise-completions/exercise-completion.model';
 import { User } from '../users/user.model';
 import { EmailNotificationsService } from '../email-notifications/email-notifications.service';
-import { MSG91 } from '../../util/send-email';
+import { MailService } from '../mail/mail.service';
 
 const WINDOW_MINUTES = 15;
 
@@ -22,6 +22,7 @@ export class ExerciseNotificationsService {
     @InjectModel(ExerciseCompletion)
     private exerciseCompletionModel: typeof ExerciseCompletion,
     private readonly emailNotificationsService: EmailNotificationsService,
+    private readonly mailService: MailService,
   ) {}
 
   @Cron(CronExpression.EVERY_MINUTE)
@@ -85,7 +86,7 @@ export class ExerciseNotificationsService {
 
     let status = 'SENT';
     try {
-      await MSG91.sendUpcomingTaskNotification(
+      await this.mailService.sendUpcomingTaskNotification(
         name,
         email,
         schedule['exerciseType.name'] as string,
@@ -137,7 +138,7 @@ export class ExerciseNotificationsService {
 
     let status = 'SENT';
     try {
-      await MSG91.sendMissedTaskNotification(
+      await this.mailService.sendMissedTaskNotification(
         name,
         email,
         schedule['exerciseType.name'] as string,

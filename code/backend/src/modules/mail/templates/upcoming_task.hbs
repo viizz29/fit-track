@@ -1,0 +1,56 @@
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <title>Upcoming Exercise Reminder</title>
+  </head>
+
+  <body
+    style='font-family: Arial, Helvetica, sans-serif; background:#f4f4f4; padding:40px;'
+  >
+
+    <table
+      style='max-width:600px;background:white;margin:auto;padding:40px;border-radius:8px;'
+    >
+      <tr>
+        <td>
+
+          <h2>Hello {{name}},</h2>
+
+          <p>
+            This is a friendly reminder that you have an upcoming exercise
+            scheduled.
+          </p>
+
+          <div
+            style='
+                    background:#f0f7ff;
+                    border-left:4px solid #2563eb;
+                    padding:16px 20px;
+                    margin:20px 0;
+                    border-radius:4px;
+                '
+          >
+            <p style='margin:0 0 8px 0; font-weight:bold; color:#1e40af;'>
+              {{task_name}}
+            </p>
+            {{#if task_description}}
+              <p style='margin:0; color:#444;'>
+                {{task_description}}
+              </p>
+            {{/if}}
+          </div>
+
+          <p>Stay consistent and keep up the great work!</p>
+
+          <p style='color:#999; font-size:13px; margin-top:30px;'>
+            You received this because you have email notifications enabled.
+          </p>
+
+        </td>
+      </tr>
+    </table>
+
+  </body>
+
+</html>

@@ -40,7 +40,10 @@ describe('ExerciseStatsService', () => {
           },
         },
         { provide: getModelToken(User), useValue: userModel },
-        { provide: getModelToken(ExerciseCompletion), useValue: completionModel },
+        {
+          provide: getModelToken(ExerciseCompletion),
+          useValue: completionModel,
+        },
       ],
     }).compile();
 
@@ -108,7 +111,9 @@ describe('ExerciseStatsService', () => {
       yesterday.setDate(yesterday.getDate() - 1);
       const yesterdayStr = yesterday.toISOString().split('T')[0];
 
-      userModel.findAll.mockResolvedValue([{ get: jest.fn().mockReturnValue('user-1') }]);
+      userModel.findAll.mockResolvedValue([
+        { get: jest.fn().mockReturnValue('user-1') },
+      ]);
       schedulesRepository.findAllByUser.mockResolvedValue([
         {
           id: 'sch-1',
@@ -131,7 +136,9 @@ describe('ExerciseStatsService', () => {
       statsRepository.hasUnfinalized.mockResolvedValue(true);
       statsRepository.finalizeDate.mockResolvedValue([1]);
 
-      userModel.findAll.mockResolvedValue([{ get: jest.fn().mockReturnValue('user-1') }]);
+      userModel.findAll.mockResolvedValue([
+        { get: jest.fn().mockReturnValue('user-1') },
+      ]);
       schedulesRepository.findAllByUser.mockResolvedValue([]);
 
       await service.computeDailyStats();
@@ -200,7 +207,9 @@ describe('ExerciseStatsService', () => {
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
 
-      userModel.findAll.mockResolvedValue([{ get: jest.fn().mockReturnValue('user-1') }]);
+      userModel.findAll.mockResolvedValue([
+        { get: jest.fn().mockReturnValue('user-1') },
+      ]);
       schedulesRepository.findAllByUser.mockResolvedValue([
         {
           id: 'sch-1',
@@ -227,7 +236,9 @@ describe('ExerciseStatsService', () => {
       const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
       const yesterdayDay = dayNames[yesterday.getDay()];
 
-      userModel.findAll.mockResolvedValue([{ get: jest.fn().mockReturnValue('user-1') }]);
+      userModel.findAll.mockResolvedValue([
+        { get: jest.fn().mockReturnValue('user-1') },
+      ]);
       schedulesRepository.findAllByUser.mockResolvedValue([
         {
           id: 'sch-1',
@@ -254,7 +265,9 @@ describe('ExerciseStatsService', () => {
       const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
       const nonMatchDay = dayNames[(yesterday.getDay() + 1) % 7];
 
-      userModel.findAll.mockResolvedValue([{ get: jest.fn().mockReturnValue('user-1') }]);
+      userModel.findAll.mockResolvedValue([
+        { get: jest.fn().mockReturnValue('user-1') },
+      ]);
       schedulesRepository.findAllByUser.mockResolvedValue([
         {
           id: 'sch-1',
@@ -282,7 +295,9 @@ describe('ExerciseStatsService', () => {
       const futureDate = new Date();
       futureDate.setDate(futureDate.getDate() + 10);
 
-      userModel.findAll.mockResolvedValue([{ get: jest.fn().mockReturnValue('user-1') }]);
+      userModel.findAll.mockResolvedValue([
+        { get: jest.fn().mockReturnValue('user-1') },
+      ]);
       schedulesRepository.findAllByUser.mockResolvedValue([
         {
           id: 'sch-1',
@@ -303,7 +318,9 @@ describe('ExerciseStatsService', () => {
       statsRepository.hasUnfinalized.mockResolvedValue(true);
       statsRepository.finalizeDate.mockResolvedValue([1]);
 
-      userModel.findAll.mockResolvedValue([{ get: jest.fn().mockReturnValue('user-1') }]);
+      userModel.findAll.mockResolvedValue([
+        { get: jest.fn().mockReturnValue('user-1') },
+      ]);
       schedulesRepository.findAllByUser.mockResolvedValue([
         {
           id: 'sch-1',

@@ -10,11 +10,13 @@ import { PasswordResetToken } from './password-reset-token.model';
 import { PasswordResetTokenRepository } from './password-reset-token.repository';
 import { UserOtp } from './user-otp.model';
 import { UserOtpRepository } from './user-otp.repository';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
     UsersModule,
     PassportModule,
+    MailModule,
     SequelizeModule.forFeature([PasswordResetToken, UserOtp]),
     // JWT Setup
     JwtModule.registerAsync({

@@ -6,11 +6,18 @@ import { ExerciseCompletion } from '../exercise-completions/exercise-completion.
 import { User } from '../users/user.model';
 import { EmailNotificationsModule } from '../email-notifications/email-notifications.module';
 import { ExerciseNotificationsService } from './exercise-notifications.service';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
-    SequelizeModule.forFeature([ExerciseSchedule, ExerciseType, ExerciseCompletion, User]),
+    SequelizeModule.forFeature([
+      ExerciseSchedule,
+      ExerciseType,
+      ExerciseCompletion,
+      User,
+    ]),
     EmailNotificationsModule,
+    MailModule,
   ],
   providers: [ExerciseNotificationsService],
 })
