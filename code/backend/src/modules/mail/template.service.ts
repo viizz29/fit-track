@@ -11,10 +11,8 @@ export class TemplateService {
   ): Promise<string> {
     const templatePath = join(
       process.cwd(),
-      'src',
-      'modules',
-      'mail',
-      'templates',
+      'assets',
+      'mail-templates',
       `${templateName}.hbs`,
     );
 

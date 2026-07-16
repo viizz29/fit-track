@@ -29,7 +29,7 @@ describe('TemplateService', () => {
       await service.render('otp', { name: 'Alice' });
 
       expect(mockedReadFile).toHaveBeenCalledWith(
-        expect.stringContaining('templates/otp.hbs'),
+        expect.stringContaining('mail-templates/otp.hbs'),
         'utf8',
       );
     });
