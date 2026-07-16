@@ -6,7 +6,7 @@ echo -e "VITE_APP_NAME=App001\nVITE_MOCK_API_ON=false\nVITE_BACKEND_SERVER=https
 npm run build
 cd ../backend
 rm -rf ./public
-cp -r ../frontend/.dist ./public
+cp -r ../frontend/dist ./public
 docker build -t fitrack:latest .
 
 # check image contents:
