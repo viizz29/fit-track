@@ -4,6 +4,8 @@ Fit Track is a full-stack exercise scheduling and tracking application built as 
 
 This repository is especially useful for developers who want to see how a modular NestJS backend can be paired with a modern React frontend, packaged with Docker, and validated through GitHub Actions.
 
+Repository: `github.com/viizz29/fit-track`
+
 ## Read Me First
 
 Use the docs in this order depending on what you need:

@@ -2,6 +2,8 @@
 
 This folder contains the React frontend for Fit Track. It provides the user interface for authentication, exercise management, schedules, completion tracking, reports, calendar views, and profile management.
 
+Repository: `github.com/viizz29/fit-track`
+
 ## How To Use This README
 
 - Use the root [`../../README.md`](../../README.md) for the product overview and full-stack setup flow

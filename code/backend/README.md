@@ -2,9 +2,11 @@
 
 This folder contains the NestJS backend for Fit Track. It is responsible for authentication, user management, exercise and schedule APIs, completion tracking, reports, email workflows, and production serving of the compiled frontend.
 
+Repository: `github.com/viizz29/fit-track`
+
 ## How To Use This README
 
-- Use the root [`../../README.md`](README.md) for the product overview and full-stack setup flow
+- Use the root [`../../README.md`](../../README.md) for the product overview and full-stack setup flow
 - Use this file when you want backend-specific structure, commands, env variables, and Docker notes
 - Use [`../frontend/README.md`](../frontend/README.md) when you need the React-side implementation details
 
@@ -39,7 +41,7 @@ The backend exposes a REST API for the frontend and handles the main business lo
 
 The backend follows a modular monolith structure. Business capabilities are grouped into NestJS modules instead of being mixed into one large service layer.
 
-This README focuses on backend implementation details. For the broader system view, go back to the root [`../../README.md`](README.md).
+This README focuses on backend implementation details. For the broader system view, go back to the root [`../../README.md`](../../README.md).
 
 ### Main modules
 
@@ -234,9 +236,9 @@ This backend uses Sequelize with migrations and seeders under [`src/database/seq
 
 The design documents in the repo give additional context:
 
-- [`../../docs/database.md`](docs/database.md)
-- [`../../docs/apis.md`](docs/apis.md)
-- [`../../docs/lld.md`](docs/lld.md)
+- [`../../docs/database.md`]../../docs/database.md)
+- [`../../docs/apis.md`]../../docs/apis.md)
+- [`../../docs/lld.md`]../../docs/lld.md)
 
 ## Security Patterns
 

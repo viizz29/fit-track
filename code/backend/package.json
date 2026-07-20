@@ -3,6 +3,10 @@
   "version": "0.0.1",
   "description": "",
   "author": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/viizz29/fit-track.git"
+  },
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
