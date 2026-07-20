@@ -239,7 +239,7 @@ Base path: `/api/v1`
   ```json
   {
     "exerciseTypeId": "uuid",
-    "recurrenceType": "HOURLY|DAILY|WEEKLY",
+    "recurrenceType": "DAILY|WEEKLY",
     "recurrenceInterval": "integer > 0",
     "startDateTime": "ISO8601 datetime with timezone",
     "timezone": "string (IANA tz name)"
@@ -252,7 +252,7 @@ Base path: `/api/v1`
   {
     "id": "uuid",
     "exerciseTypeId": "uuid",
-    "recurrenceType": "HOURLY|DAILY|WEEKLY",
+    "recurrenceType": "DAILY|WEEKLY",
     "recurrenceInterval": integer,
     "startDateTime": "ISO8601 datetime with timezone",
     "timezone": "string",
@@ -274,7 +274,7 @@ Base path: `/api/v1`
     {
       "id": "uuid",
       "exerciseTypeId": "uuid",
-      "recurrenceType": "HOURLY|DAILY|WEEKLY",
+      "recurrenceType": "DAILY|WEEKLY",
       "recurrenceInterval": integer,
       "startDateTime": "ISO8601 datetime with timezone",
       "timezone": "string",
@@ -299,7 +299,7 @@ Base path: `/api/v1`
   {
     "id": "uuid",
     "exerciseTypeId": "uuid",
-    "recurrenceType": "HOURLY|DAILY|WEEKLY",
+    "recurrenceType": "DAILY|WEEKLY",
     "recurrenceInterval": integer,
     "startDateTime": "ISO8601 datetime with timezone",
     "timezone": "string",
@@ -317,7 +317,7 @@ Base path: `/api/v1`
   ```json
   {
     "exerciseTypeId": "uuid",
-    "recurrenceType": "HOURLY|DAILY|WEEKLY",
+    "recurrenceType": "DAILY|WEEKLY",
     "recurrenceInterval": "integer > 0",
     "startDateTime": "ISO8601 datetime with timezone",
     "timezone": "string"
@@ -331,7 +331,7 @@ Base path: `/api/v1`
   {
     "id": "uuid",
     "exerciseTypeId": "uuid",
-    "recurrenceType": "HOURLY|DAILY|WEEKLY",
+    "recurrenceType": "DAILY|WEEKLY",
     "recurrenceInterval": integer,
     "startDateTime": "ISO8601 datetime with timezone",
     "timezone": "string",

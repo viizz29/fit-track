@@ -390,7 +390,7 @@ Root
 
 **Primary user actions:**  
 - Select exercise type (dropdown/search)  
-- Select recurrence type (radio or dropdown: Hourly, Daily, Weekly)  
+- Select recurrence type (radio or dropdown: Daily, Weekly)  
 - Input recurrence interval (number input > 0)  
 - Select start datetime with timezone  
 - Save or cancel  
@@ -403,8 +403,8 @@ Root
 +------------------------------------------------------+
 | Form:                                                |
 |  - Exercise Type: [Dropdown/Search]                 |
-|  - Recurrence Type: ( ) Hourly ( ) Daily ( ) Weekly |
-|  - Recurrence Interval: [___] (e.g. every N hours)  |
+|  - Recurrence Type: ( ) Daily ( ) Weekly |
+|  - Recurrence Interval: [___] (e.g. every N days)  |
 |  - Start Date & Time: [Date Picker] [Time Picker]   |
 |  - Timezone: [Dropdown - default user tz]           |
 |                                                      |

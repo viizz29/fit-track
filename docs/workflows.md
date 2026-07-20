@@ -2,7 +2,7 @@
 
 **What the application does:**
 
-A personalized exercise scheduling and tracking platform that enables users to create exercise types, schedule recurring exercises with hourly/daily/weekly intervals, mark exercises as completed, receive email reminders (for upcoming and missed exercises), and generate simple progress reports to monitor exercise compliance and trends.
+A personalized exercise scheduling and tracking platform that enables users to create exercise types, schedule recurring exercises with daily/weekly intervals, mark exercises as completed, receive email reminders (for upcoming and missed exercises), and generate simple progress reports to monitor exercise compliance and trends.
 
 **Who uses it:**
 
@@ -78,7 +78,7 @@ Primary Users — individuals who want to organize and manage their own exercise
   - id (UUID, PK)
   - user_id (FK)
   - exercise_type_id (FK)
-  - recurrence_type (enum: HOURLY, DAILY, WEEKLY)
+  - recurrence_type (enum: DAILY, WEEKLY)
   - recurrence_interval (integer > 0)
   - start_datetime (timestamp with tz)
   - timezone (string)
@@ -214,7 +214,7 @@ Primary Users — individuals who want to organize and manage their own exercise
 
 **Steps:**
 
-1. User selects ExerciseType, recurrence type (hourly/daily/weekly), interval, start datetime, and timezone.
+1. User selects ExerciseType, recurrence type (daily/weekly), interval, start datetime, and timezone.
 2. System validates inputs, persistence of schedule.
 3. User retrieves list of schedules with recurrence details.
 4. User can update or delete schedules (ownership enforced).

@@ -2,7 +2,7 @@
 # High Level Design Document: Exercise Scheduling & Tracking Application
 
 ## 1. System Overview
-This system provides a personalized platform for users to create and manage exercise types, schedule recurring exercises with hourly, daily, or weekly frequencies, record completions, receive email reminders for upcoming or missed exercises, and view simple progress reports. The system prioritizes secure user authentication and personalized data management while maintaining a scalable and reliable architecture suitable for future enhancements.
+This system provides a personalized platform for users to create and manage exercise types, schedule recurring exercises with daily, or weekly frequencies, record completions, receive email reminders for upcoming or missed exercises, and view simple progress reports. The system prioritizes secure user authentication and personalized data management while maintaining a scalable and reliable architecture suitable for future enhancements.
 
 ---
 
@@ -20,11 +20,11 @@ This system provides a personalized platform for users to create and manage exer
 |----------------------------|----------------------------------------------------------------------------------------------------------------------------------|
 | Authentication & User Management | Handle user registration, login, profile updates, password management, and email configuration.                                  |
 | Exercise Management         | CRUD operations for exercise types (name, optional description).                                                                  |
-| Scheduling Module           | Create, edit, delete exercise schedules with flexible recurrence (hourly, daily, weekly); manages schedule metadata and validation. |
+| Scheduling Module           | Create, edit, delete exercise schedules with flexible recurrence (daily, weekly); manages schedule metadata and validation. |
 | Completion Tracking         | Record user actions marking exercises as completed; maintain completion history.                                                  |
 | Notification Service        | Generate and send email reminders for upcoming and missed exercises based on user preferences and schedule data.                  |
 | Reporting Engine           | Generate basic reports summarizing exercise completion counts, misses, and completion rates over configurable time periods.        |
-| API Layer                  | Expose endpoints for web/mobile interface interactions covering all functionality.                                                 |
+| API Layer                  | Expose endpoints for web interface interactions covering all functionality.                                                 |
 
 ---
 
@@ -47,7 +47,7 @@ This system provides a personalized platform for users to create and manage exer
 |-----------------------|------------------------------------------------------------|--------------------------------------------------------------|
 | Users                 | User profiles and authentication data                      | UserID (PK), Email, PasswordHash, Timezone, Preferences       |
 | ExerciseTypes         | User-defined exercise categories                            | ExerciseTypeID (PK), UserID (FK), Name, Description           |
-| ExerciseSchedules     | Scheduled exercise instances with recurrence rules         | ScheduleID (PK), UserID (FK), ExerciseTypeID (FK), RecurrenceType (Hourly/Daily/Weekly), RecurrenceInterval, StartDateTime, Timezone |
+| ExerciseSchedules     | Scheduled exercise instances with recurrence rules         | ScheduleID (PK), UserID (FK), ExerciseTypeID (FK), RecurrenceType (Daily/Weekly), RecurrenceInterval, StartDateTime, Timezone |
 | ExerciseCompletions   | Records of completed exercises                              | CompletionID (PK), ScheduleID (FK), CompletionDateTime         |
 | EmailNotifications    | Tracking sent reminders                                      | NotificationID (PK), UserID (FK), ScheduleID (FK), NotificationType (Upcoming/Missed), SentTimestamp |
   

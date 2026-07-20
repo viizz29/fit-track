@@ -82,7 +82,7 @@
 
 ### Responsibilities
 - Create, edit, delete exercise schedules linked to exercise types.
-- Supports recurrence types: hourly (N hours), daily (N days), weekly (N weeks).
+- Supports recurrence types: daily (N days), weekly (N weeks).
 - Validate recurrence rules and ensure schedules belong to the user.
 - Provide listing of scheduled exercises with recurrence detail.
 - Store timezone information for accurate scheduling.
@@ -92,8 +92,8 @@
   - ScheduleID (PK)
   - UserID (FK)
   - ExerciseTypeID (FK)
-  - RecurrenceType (enum: HOURLY, DAILY, WEEKLY)
-  - RecurrenceInterval (integer, e.g., every N hours/days/weeks)
+  - RecurrenceType (enum: DAILY, WEEKLY)
+  - RecurrenceInterval (integer, e.g., every N days/weeks)
   - StartDateTime (timestamp)
   - Timezone (string)
   - CreatedAt

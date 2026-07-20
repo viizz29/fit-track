@@ -36,7 +36,7 @@ CREATE INDEX idx_exercise_types_user_id ON exercise_types (user_id);
 -- ================================
 -- 3. Exercise Schedules Table
 -- ================================
-CREATE TYPE recurrence_type_enum AS ENUM ('HOURLY', 'DAILY', 'WEEKLY');
+CREATE TYPE recurrence_type_enum AS ENUM ('DAILY', 'WEEKLY');
 
 CREATE TABLE exercise_schedules (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

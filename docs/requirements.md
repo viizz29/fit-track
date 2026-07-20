@@ -1,17 +1,17 @@
 ```markdown
 # Project Overview
 
-This application enables users to create different types of exercises, schedule them with flexible recurrence options (hourly, daily, weekly), track completed exercises, send email reminders for upcoming or missed exercises, and generate basic reports summarizing exercise activity.
+This application enables users to create different types of exercises, schedule them with flexible recurrence options (daily, weekly), track completed exercises, send email reminders for upcoming or missed exercises, and generate basic reports summarizing exercise activity.
 
 # Assumptions
 
 - Users create and manage their own exercises and schedules; multi-user collaboration or sharing is not required for MVP.
-- Scheduling frequencies are limited to hourly, daily, and weekly for MVP.
+- Scheduling frequencies are limited to daily, and weekly for MVP.
 - Email reminders are sent only for the exercise owner.
 - Reporting focuses on basic summaries such as completion rates and missed exercises over configurable time periods.
 - The system will support a single timezone per user.
 - Exercise types can be simple categorizations (e.g., "running," "yoga") without detailed configurable parameters or metrics.
-- Users interact via a web or mobile interface (exact platform unspecified).
+- Users interact via a web interface.
 - No integration with third-party calendar or reminder services is required for MVP.
   
 # Goals
@@ -27,7 +27,7 @@ This application enables users to create different types of exercises, schedule 
 # Functional Requirements
 
 1. Enable users to create, edit, and delete exercise types with a name and optional description.
-2. Allow users to schedule exercises with recurrence options: hourly (N hours), daily (N days), weekly (N weeks).
+2. Allow users to schedule exercises with recurrence options: daily (N days), weekly (on particular days of every week).
 3. Provide the ability to view the list of scheduled exercises and their recurrence patterns.
 4. Track and record when a user marks an exercise as completed.
 5. Support email reminders for:
@@ -44,7 +44,7 @@ This application enables users to create different types of exercises, schedule 
 # User Stories
 
 * As a user, I want to create exercise types, so that I can organize different routines.
-* As a user, I want to schedule exercises at hourly, daily, or weekly intervals, so that I can establish a regular workout plan.
+* As a user, I want to schedule exercises at daily, or weekly intervals, so that I can establish a regular workout plan.
 * As a user, I want to receive email reminders about upcoming exercises, so that I don't forget to complete them.
 * As a user, I want to receive email notifications for missed exercises, so that I stay aware of my progress.
 * As a user, I want to mark exercises as completed, so that the system accurately tracks my activity.
@@ -64,7 +64,7 @@ This application enables users to create different types of exercises, schedule 
 # Out Of Scope
 
 - Integration with third-party calendar apps or reminder services.
-- Complex recurrence options beyond hourly, daily, and weekly frequencies.
+- Complex recurrence options beyond daily, and weekly frequencies.
 - Social or collaborative features (sharing schedules, group exercises).
 - Advanced metrics or analytics beyond basic completion and missed counts.
 - Offline access or mobile push notifications.
