@@ -15,13 +15,13 @@ import {
   CacheInterceptor,
   CacheTTL,
 } from '@nestjs/cache-manager';
-import { Throttle } from '@nestjs/throttler';
+import { minutes, Throttle } from '@nestjs/throttler';
 import { type Cache } from 'cache-manager';
 
 @Controller('')
 @Throttle({
   default: {
-    ttl: 60_000,
+    ttl: minutes(1),
     limit: 10,
   },
 })
@@ -36,12 +36,6 @@ export class AppController {
   @Public()
   @Get('test1')
   @CacheTTL(60_000) // 60 seconds in ms (PX)
-  @Throttle({
-    default: {
-      ttl: 60_000,
-      limit: 3,
-    },
-  })
   test1(): string {
     console.log('Test1 API Hit !');
     return 'test1 success';

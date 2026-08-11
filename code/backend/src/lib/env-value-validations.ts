@@ -3,6 +3,7 @@ import * as Joi from 'joi';
 const DEFAULT_PORT = 3000;
 
 export default Joi.object({
+  APP_NAME: Joi.string().default('fitrack'),
   PORT: Joi.number().default(DEFAULT_PORT),
   JWT_SECRET: Joi.string().required(),
 
@@ -37,4 +38,8 @@ export default Joi.object({
   SMTP_PASSWORD: Joi.string().required(),
   MAIL_FROM_ADDRESS: Joi.string().email().required(),
   MAIL_FROM_NAME: Joi.string().required(),
+
+  DEFAULT_API_CALL_LIMIT_PER_MINUTE: Joi.number().default(20),
+  DEFAULT_API_CALL_LIMIT_PER_24_HOURS: Joi.number().default(100),
+  GLOBAL_API_CALL_LIMIT_PER_24_HOURS: Joi.number().default(100),
 });

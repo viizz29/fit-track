@@ -15,7 +15,12 @@ import { EmailVerifiedGuard } from '../../common/guards/email-verified.guard';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { ChatModule } from '../chat/chat.module';
 // import { ServeStaticModule } from '@nestjs/serve-static';
-import { ThrottlerModule, ThrottlerGuard, seconds } from '@nestjs/throttler';
+import {
+  ThrottlerModule,
+  ThrottlerGuard,
+  seconds,
+  days,
+} from '@nestjs/throttler';
 import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
@@ -83,12 +88,13 @@ const imports = [
     imports: [ConfigModule],
     inject: [ConfigService],
     useFactory: async (config: ConfigService) => {
-      const { REDIS_HOST, REDIS_PORT, REDIS_USER, REDIS_PASSWORD } =
+      const { REDIS_HOST, REDIS_PORT, REDIS_USER, REDIS_PASSWORD, APP_NAME } =
         process.env;
       const url = `redis://${REDIS_USER}:${REDIS_PASSWORD}@${REDIS_HOST}:${REDIS_PORT}`;
       return {
         store: await redisStore({
           url,
+          keyPrefix: APP_NAME,
         }),
       };
     },
@@ -98,17 +104,38 @@ const imports = [
     imports: [ConfigModule],
     inject: [ConfigService],
     useFactory: (config: ConfigService) => {
-      const { REDIS_HOST, REDIS_PORT, REDIS_USER, REDIS_PASSWORD } =
-        process.env;
+      const {
+        REDIS_HOST,
+        REDIS_PORT,
+        REDIS_USER,
+        REDIS_PASSWORD,
+        DEFAULT_API_CALL_LIMIT_PER_MINUTE,
+        DEFAULT_API_CALL_LIMIT_PER_24_HOURS,
+        GLOBAL_API_CALL_LIMIT_PER_24_HOURS,
+        APP_NAME,
+      } = process.env;
       const url = `redis://${REDIS_USER}:${REDIS_PASSWORD}@${REDIS_HOST}:${REDIS_PORT}`;
       return {
         throttlers: [
           {
+            name: 'default',
             ttl: seconds(60),
-            limit: 20,
+            limit: Number(DEFAULT_API_CALL_LIMIT_PER_MINUTE),
+          },
+          {
+            name: 'day',
+            ttl: days(1),
+            limit: Number(DEFAULT_API_CALL_LIMIT_PER_24_HOURS),
+          },
+          {
+            name: 'global-day',
+            ttl: days(1),
+            limit: Number(GLOBAL_API_CALL_LIMIT_PER_24_HOURS),
           },
         ],
-        storage: new ThrottlerStorageRedisService(url),
+        storage: new ThrottlerStorageRedisService(url, {
+          keyPrefix: APP_NAME,
+        }),
       };
     },
   }),
