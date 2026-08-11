@@ -47,7 +47,7 @@ COPY --from=builder /app/dist ./dist
 # (Optional) copy static assets
 COPY --from=builder /app/assets ./assets
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/.sequelizerc ./sequelizerc
+COPY --from=builder /app/.sequelizerc ./.sequelizerc
 
 # (Optional) copy .env.production
 # COPY .env.production .env.production
