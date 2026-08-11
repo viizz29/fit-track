@@ -1,5 +1,7 @@
 // src/database/sequelize.config.js
-require('dotenv').config({ path: `.env.${process.env.NODE_ENV}` });
+// let the responsibility of loading the env values to external tools
+// require('dotenv').config({ path: `.env.${process.env.NODE_ENV}` });
+
 const PASS = decodeURIComponent(process.env.DB_PASSWORD);
 
 module.exports = {

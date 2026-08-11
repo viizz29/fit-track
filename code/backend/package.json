@@ -15,7 +15,7 @@
     "start": "nest start",
     "start:dev": "cross-env NODE_ENV=local nest start --watch",
     "migrate:dev": "cross-env NODE_ENV=local npx sequelize db:migrate",
-    "migrate:prod": "cross-env NODE_ENV=production npx sequelize db:migrate",
+    "migrate:prod": "npx sequelize db:migrate",
     "seed:dev": "cross-env NODE_ENV=local npx sequelize-cli db:seed:all",
     "seed:prod": "cross-env NODE_ENV=production npx sequelize-cli db:seed:all",
     "db:create:dev": "cross-env NODE_ENV=local npx sequelize db:create",
